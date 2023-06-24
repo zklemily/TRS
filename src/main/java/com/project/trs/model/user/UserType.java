@@ -7,6 +7,8 @@ import java.util.List;
 @Entity
 @Table(name = "userType")
 public class UserType {
+    public UserType() {}
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -14,4 +16,20 @@ public class UserType {
 
     @OneToMany(mappedBy = "userType")
     private List<User> users;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }

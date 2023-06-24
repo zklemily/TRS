@@ -10,7 +10,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "user_type_id")
     private UserType userType;
     private String firstName;
@@ -18,7 +18,7 @@ public class User {
     private String username;
     private String password;
     private String email;
-    private Boolean isActive;
+    private boolean isActive;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
@@ -48,6 +48,22 @@ public class User {
 
     public String getUsername() {
         return username;
+    }
+
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public void setUsername(String username) {
