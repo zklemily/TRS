@@ -5,6 +5,8 @@ import com.project.trs.model.user.User;
 import java.util.List;
 
 public interface UserService {
+    public User saveUser(User user);
+
     public User registerUser(User user);
 
     public List<User> getAllUsers();
