@@ -12,4 +12,6 @@ public interface UserService {
     public List<User> getAllUsers();
 
     public User getUserById(int id);
+
+    public User authenticateUser(String username, String password);
 }

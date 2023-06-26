@@ -5,6 +5,7 @@ import com.project.trs.model.user.User;
 import com.project.trs.model.user.UserType;
 import com.project.trs.repository.UserRepository;
 import com.project.trs.repository.UserTypeRepository;
+import com.project.trs.exception.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,5 +59,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(int id) {
         return userRepository.findById(id).orElseThrow(()-> new UserNotFoundException(id));
+    }
+
+    @Override
+    public User authenticateUser(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        if (user != null && user.getPassword().equals(password)) {
+            return user;
+        } else {
+            throw new AuthenticationException();
+        }
     }
 }
