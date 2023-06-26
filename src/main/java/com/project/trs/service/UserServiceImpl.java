@@ -1,11 +1,14 @@
 package com.project.trs.service;
 
+import com.project.trs.exception.UserNotFoundException;
 import com.project.trs.model.user.User;
 import com.project.trs.model.user.UserType;
 import com.project.trs.repository.UserRepository;
 import com.project.trs.repository.UserTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -40,5 +43,15 @@ public class UserServiceImpl implements UserService {
         // Set the fetched UserType to the User entity
         user.setUserType(existingUserType);
         return userRepository.save(user);
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User getUserById(int id) {
+        return userRepository.findById(id).orElseThrow(()-> new UserNotFoundException(id));
     }
 }
