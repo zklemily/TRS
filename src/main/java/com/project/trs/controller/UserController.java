@@ -44,7 +44,6 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-    // what fields do we allow to update?
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable int id, @RequestBody User updateUser) {
         User curUser = userService.getUserById(id);
@@ -66,6 +65,16 @@ public class UserController {
                         "It must be a combination of uppercase letters, lowercase letters, numbers, and symbols.");
             }
             curUser.setPassword(updateUser.getPassword());
+        }
+
+        // update email
+        if (updateUser.getEmail() != null) {
+            if (userServiceHelper.isDuplicateEmail(updateUser.getEmail())) {
+                throw new IllegalArgumentException("This email already exists.");
+            }
+            if (userServiceHelper.invalidEmailFormat(updateUser.getEmail())) {
+                throw new IllegalArgumentException("Invalid email format.");
+            }
         }
 
         userService.saveUser(curUser);

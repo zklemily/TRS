@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class UserServiceHelper {
     @Autowired
     private UserRepository userRepository;
-    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(?:[A-Za-z0-9.-]+\\.)?upenn\\.edu$";
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
     private static final String USERNAME_REGEX = "^[a-zA-Z][a-zA-Z0-9]{4,12}$";
     private static final Pattern USERNAME_PATTERN = Pattern.compile(USERNAME_REGEX);
