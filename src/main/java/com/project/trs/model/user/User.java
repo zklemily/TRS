@@ -86,11 +86,11 @@ public class User {
         this.email = email;
     }
 
-    public Boolean getActive() {
+    public boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(Boolean active) {
+    public void setIsActive(Boolean active) {
         isActive = active;
     }
 

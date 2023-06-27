@@ -4,6 +4,7 @@ import com.project.trs.model.user.User;
 import com.project.trs.service.UserService;
 import com.project.trs.service.UserServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class UserController {
     @Autowired
     private UserServiceHelper userServiceHelper;
 
-    @PostMapping("")
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> register(@RequestBody User user) {
         userService.registerUser(user);
         return ResponseEntity.ok("User is added.");
