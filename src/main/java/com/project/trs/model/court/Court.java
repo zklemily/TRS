@@ -14,4 +14,20 @@ public class Court {
     @ManyToOne
     @JoinColumn(name = "court_type_id")
     private CourtType courtType;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public CourtType getCourtType() {
+        return courtType;
+    }
+
+    public void setCourtType(CourtType courtType) {
+        this.courtType = courtType;
+    }
 }
