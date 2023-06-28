@@ -108,7 +108,7 @@ export default function SignUp() {
             name="username"
             value={username}
             helperText= "Must be 5-12 characters, start with a letter"
-            error={username != '' && !/^[a-zA-Z][a-zA-Z0-9]{5,12}$/i.test(username)}
+            error={username !== '' && !/^[a-zA-Z][a-zA-Z0-9]{5,12}$/i.test(username)}
             onChange={(e) => handleInputChange(e)}
           />
         </Grid>
@@ -122,7 +122,7 @@ export default function SignUp() {
             value={email}
             helperText= {emailExists ? "This email already exists" : "Must be a valid email address"}
             onChange={(e) => handleInputChange(e)}
-            error={(email != '' && !/^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i.test(email)) || emailExists }
+            error={(email !== '' && !/^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i.test(email)) || emailExists }
             inputProps={{
               pattern: "^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]+)*$",
             }}
@@ -137,7 +137,7 @@ export default function SignUp() {
             name="password"
             value={password}
             helperText= "Must be 12-20 chararcters with uppercase letters, lowercase letters, numbers, and special characters"
-            error={password != '' && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,20}/i.test(password)}
+            error={password !== '' && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,20}/i.test(password)}
             onChange={(e) => handleInputChange(e)}
           />
         </Grid>
