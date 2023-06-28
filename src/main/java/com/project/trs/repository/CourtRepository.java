@@ -13,6 +13,9 @@ import java.util.List;
 public interface CourtRepository extends JpaRepository<Court, Integer> {
     long count();
 
+    // return all courts with type = typeId
+    List<Court> findByCourtTypeId(int typeId);
+
     @Query(value = "SELECT COUNT(c) FROM Court c WHERE c.courtTypeId = :typeId", nativeQuery = true)
     long countCourtsByCourtTypeId(@Param("typeId") int typeId);
 
