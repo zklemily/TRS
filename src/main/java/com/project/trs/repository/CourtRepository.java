@@ -13,12 +13,12 @@ import java.util.List;
 public interface CourtRepository extends JpaRepository<Court, Integer> {
     long count();
 
-    @Query("SELECT COUNT(c) FROM Court c WHERE c.courtType.id = :courtId")
-    long countCourtsByCourtTypeId(@Param("courtId") int courtId);
+    @Query(value = "SELECT COUNT(c) FROM Court c WHERE c.courtTypeId = :typeId", nativeQuery = true)
+    long countCourtsByCourtTypeId(@Param("typeId") int typeId);
 
-    @Query("SELECT c FROM Court c WHERE c.courtTypeId = :typeId AND NOT EXISTS " +
+    @Query(value = "SELECT c FROM Court c WHERE c.courtTypeId = :typeId AND NOT EXISTS " +
             "(SELECT r FROM Reservation r WHERE r.court = c " +
-            "AND r.startTime <= :endTime AND r.endTime >= :startTime)")
+            "AND r.startTime <= :endTime AND r.endTime >= :startTime)", nativeQuery = true)
     List<Court> findAvailableCourtsByType(@Param("typeId") int typeId, @Param("startTime") Timestamp startTime,
                                                @Param("endTime") Timestamp endTime);
 }

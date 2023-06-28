@@ -11,9 +11,11 @@ public class Court {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "court_type_id")
     private CourtType courtType;
+
+    private String displayName;
 
     public int getId() {
         return id;

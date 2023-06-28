@@ -11,8 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
-    @Query("SELECT r FROM Reservation r WHERE r.status = 'reserved' AND r.startTime <= :endTime" +
-            "AND r.endTime >= :startTime")
+    @Query(value = "SELECT * FROM reservation r WHERE r.res_status_id = 1 AND r.start_time <= :endTime AND r.end_time >= :startTime", nativeQuery = true)
     List<Reservation> timeConflictingReservations(@Param("startTime") Timestamp startTime, @Param("endTime") Timestamp endTime);
 
 }
