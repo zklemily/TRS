@@ -21,7 +21,12 @@ public interface CourtRepository extends JpaRepository<Court, Integer> {
 
     @Query(value = "SELECT c FROM Court c WHERE c.courtTypeId = :typeId AND NOT EXISTS " +
             "(SELECT r FROM Reservation r WHERE r.court = c " +
-            "AND r.startTime <= :endTime AND r.endTime >= :startTime)", nativeQuery = true)
+            "AND r.startTime < :endTime AND r.endTime > :startTime)", nativeQuery = true)
     List<Court> findAvailableCourtsByType(@Param("typeId") int typeId, @Param("startTime") Timestamp startTime,
                                                @Param("endTime") Timestamp endTime);
+
+    @Query(value = "SELECT COUNT(*) FROM reservation WHERE court_id = :courtId AND start_time < :endTime" +
+            " AND end_time > :startTime AND res_status_id = 1", nativeQuery = true)
+    long courtReserved(@Param("courtId") int courtId,  @Param("startTime") Timestamp startTime,
+                             @Param("endTime") Timestamp endTime);
 }
