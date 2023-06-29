@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useFormControl, Box, TextField, Button, Typography, Grid, Link } from '@mui/material';
+import { Box, TextField, Button, Typography, Grid, Link } from '@mui/material';
 
 export default function SignUp() {
 
@@ -73,8 +73,8 @@ export default function SignUp() {
         <Typography variant="h3" component="h3">
           Sign Up
         </Typography>
-        <Typography variant="h7" component="h7">
-         Already a member? <Link href="/sign-in">Log in </Link>
+        <Typography variant="h7" component="h7" color="text.secondary">
+         Already a member? <Link href="/" color="text.secondary" underline="hover">Log in </Link>
         </Typography>
       </Box>
 
@@ -143,9 +143,9 @@ export default function SignUp() {
         </Grid>
       </Grid>
 
-      <Box mt={4} textAlign="center">
+      <Box mt={3} textAlign="center">
       <Button
-        style={{ maxHeight: '50px', minHeight: '50px', fontSize: '18px' }}
+        style={{ height: '50px', fontSize: '18px' , borderRadius: '100px'}}
         type="submit"
         variant="contained"
         color="primary"
