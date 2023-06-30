@@ -10,9 +10,9 @@ import java.util.regex.Pattern;
 public class UserServiceHelper {
     @Autowired
     private UserRepository userRepository;
-    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+    private static final String EMAIL_REGEX = "^[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
-    private static final String USERNAME_REGEX = "^[a-zA-Z][a-zA-Z0-9]{4,12}$";
+    private static final String USERNAME_REGEX = "^[a-zA-Z][a-zA-Z0-9]{5,12}$";
     private static final Pattern USERNAME_PATTERN = Pattern.compile(USERNAME_REGEX);
     private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{12,20}$";
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(PASSWORD_REGEX);

@@ -13,5 +13,7 @@ public interface UserService {
 
     public User getUserById(int id);
 
+    public User getUserByEmail(String email);
+
     public User authenticateUser(String username, String password);
 }
