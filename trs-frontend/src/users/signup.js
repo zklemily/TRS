@@ -87,7 +87,7 @@ export default function SignUp() {
   return (
     <form onSubmit={(e) => handleSubmit(e)}>
       <Box mb={4} textAlign="center">   
-        <Typography variant="h3" component="h3">
+        <Typography variant="h3" component="h3" color="primary">
           Sign Up
         </Typography>
         <Typography variant="h7" component="h7" color="text.secondary">
