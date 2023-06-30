@@ -71,9 +71,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            return user;
+        }
+        throw new UserNotFoundException(username);
+    }
+
+    @Override
     public User authenticateUser(String username, String password) {
         User user = userRepository.findByUsername(username);
         if (user != null && user.getPassword().equals(password)) {
+            System.out.println("found user");
             return user;
         } else {
             throw new AuthenticationException();

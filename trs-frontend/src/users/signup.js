@@ -23,6 +23,8 @@ export default function SignUp() {
   const { firstName, lastName, username, email, password, isActive, userType, createdAt, updatedAt } = user;
 
   const [emailExists, setEmailExists] = useState(false);
+  const [usernameExists, setUsernameExists] = useState(false);
+
   const handleInputChange = async   (e) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
@@ -31,11 +33,26 @@ export default function SignUp() {
       const exists = await checkEmailExists(value);
       setEmailExists(exists);
     }
+
+    if (name === 'username') {
+      const exists = await checkUsernameExists(value);
+      setUsernameExists(exists);
+    }
   };
 
   const checkEmailExists = async (email) => {
     try {
       const response = await axios.get(`http://localhost:8080/users/check-email=${email}`);
+      return response.data !== null;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  };
+
+  const checkUsernameExists = async (username) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/users/check-username=${username}`);
       return response.data !== null;
     } catch (error) {
       console.error(error);
@@ -107,8 +124,8 @@ export default function SignUp() {
             label="Username"
             name="username"
             value={username}
-            helperText= "Must be 5-12 characters, start with a letter"
-            error={username !== '' && !/^[a-zA-Z][a-zA-Z0-9]{5,12}$/i.test(username)}
+            helperText= {usernameExists ? "This email already exists" : "Must be 5-12 characters, start with a letter"}
+            error={(username !== '' && !/^[a-zA-Z][a-zA-Z0-9]{5,12}$/i.test(username)) || usernameExists}
             onChange={(e) => handleInputChange(e)}
           />
         </Grid>
@@ -157,6 +174,7 @@ export default function SignUp() {
           email === '' ||
           password === '' ||
           emailExists ||
+          usernameExists ||
           !/^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i.test(email) ||
           !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,20}/i.test(password) ||
           !/^[a-zA-Z][a-zA-Z0-9]{5,12}$/i.test(username)

@@ -16,4 +16,6 @@ public interface UserService {
     public User getUserByEmail(String email);
 
     public User authenticateUser(String username, String password);
+
+    public User getUserByUsername(String username);
 }

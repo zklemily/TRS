@@ -49,6 +49,11 @@ public class UserController {
         return userService.getUserByEmail(email);
     }
 
+    @GetMapping("/check-username={username}")
+    public User getUserByUsername(@PathVariable String username) {
+        return userService.getUserByUsername(username);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable int id, @RequestBody User updateUser) {
         User curUser = userService.getUserById(id);

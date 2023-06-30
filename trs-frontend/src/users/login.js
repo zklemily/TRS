@@ -9,41 +9,62 @@ export default function Login() {
   let navigate = useNavigate();
 
   const [user, setUser] = useState({
-    email: '',
+    username: '',
     password: '',
   });
 
-  const { email, password } = user;
+  const { username, password } = user;
 
-  const [emailExists, setEmailExists] = useState(false);
-  const handleInputChange = async   (e) => {
+  const [formError, setError] = useState('');
+
+  // const [emailExists, setEmailExists] = useState(false);
+
+  const handleInputChange = async (e) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
   
-    if (name === 'email') {
-      const exists = await checkEmailExists(value);
-      setEmailExists(exists);
-    }
+    // if (name === 'email') {
+    //   const exists = await checkEmailExists(value);
+    //   setEmailExists(exists);
+    // }
   };
 
-  const checkEmailExists = async (email) => {
+
+  // const checkEmailExists = async (email) => {
+  //   try {
+  //     const response = await axios.get(`http://localhost:8080/users/check-email=${email}`);
+  //     return response.data !== null;
+  //   } catch (error) {
+  //     console.error(error);
+  //     return false;
+  //   }
+  // };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newUser = {
+      username,
+      password
+    };
+
     try {
-      const response = await axios.get(`http://localhost:8080/users/check-email=${email}`);
-      return response.data !== null;
+      const response = await axios.post('http://localhost:8080/users/login', newUser);
+      console.log(response.data);
+      
+      if (response.status === 200) {
+        // Redirect to the user homepage
+        navigate(`/home`);
+      } else {
+        setError(response.data);
+      }
     } catch (error) {
       console.error(error);
-      return false;
     }
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Perform login logic here
-    navigate('/'); // Redirect to the home page
   };
 
   return (
     <form onSubmit={(e) => handleSubmit(e)}>
+      {formError && <p>{formError}</p>}
       <Box mb={2} textAlign="center">
        <img src={PennImage} height="80" alt="tennis center" />
       </Box>
@@ -56,7 +77,7 @@ export default function Login() {
 
 
       <Grid container spacing={2}>
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <TextField
             required
             fullWidth
@@ -64,17 +85,21 @@ export default function Login() {
             label="Email address"
             name="email"
             value={email}
-            // helperText= {
-            //   email === '' ? "" : ( 
-            //     !/^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i.test(email) ? "Must be a valid email address" : ( 
-            //       emailExists ? "" : "This email does not exist yet")
-            //   )
-            // }
             onChange={(e) => handleInputChange(e)}
-            // error={(email !== '' && !/^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i.test(email)) || (email !== '' && !emailExists) }
             inputProps={{
               pattern: "^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]+)*$",
             }}
+          />
+        </Grid> */}
+
+        <Grid item xs={12}>
+          <TextField
+            required
+            fullWidth
+            label="Username"
+            name="username"
+            value={username}
+            onChange={(e) => handleInputChange(e)}
           />
         </Grid>
         <Grid item xs={12}>
@@ -104,10 +129,8 @@ export default function Login() {
         color="primary"
         fullWidth
         disabled={
-          email === '' ||
-          password === '' ||
-          !emailExists ||
-          !/^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i.test(email)
+          username === '' ||
+          password === ''
         }
       >
         Login
