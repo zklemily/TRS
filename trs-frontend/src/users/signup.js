@@ -6,17 +6,19 @@ export default function SignUp() {
 
   let navigate = useNavigate();
 
-  const [user, setUser] = useState(
-    {
-      firstName: '',
-      lastName: '',
-      username: '',
-      email: '',
-      password: '',
-    }
-  );
+  const [user, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    password: '',
+    isActive: true,
+    userType: { type: 'FullTimeStudent' },
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
 
-  const { firstName, lastName, username, email, password } = user;
+  const { firstName, lastName, username, email, password, isActive, userType, createdAt, updatedAt } = user;
 
   const handleInputChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -31,8 +33,10 @@ export default function SignUp() {
       username,
       email,
       password,
-      isActive: true,
-      userType: { "type": "FullTimeStudent" },
+      isActive,
+      userType,
+      createdAt,
+      updatedAt,
     };
 
     try {
