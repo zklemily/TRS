@@ -1,7 +1,8 @@
 package com.project.trs.controller;
 
-import com.project.trs.dto.AvailabilityResponse;
+import com.project.trs.dto.CourtAvailabilityResponse;
 import com.project.trs.dto.Timeslot;
+import com.project.trs.dto.WeekAvailabilityResponse;
 import com.project.trs.model.court.Court;
 import com.project.trs.service.CourtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +43,8 @@ public class CourtController {
     }
 
     // get the availability of each court over the next 7 days
-    @GetMapping("/availability")
-    public AvailabilityResponse getCourtAvailability() {
+    @GetMapping("/court-availability")
+    public CourtAvailabilityResponse getCourtAvailability() {
         Map<Integer, Map<LocalDate, List<Timeslot>>> courtAvailabilityMap = new HashMap<>();
 
         // loop through all courts
@@ -59,7 +60,40 @@ public class CourtController {
             }
             courtAvailabilityMap.put(court.getId(), dayMap);
         }
-        return new AvailabilityResponse(courtAvailabilityMap);
+        return new CourtAvailabilityResponse(courtAvailabilityMap);
     }
+
+    // get the availability of each hour over the next 7 days
+    @GetMapping("/week-availability")
+    public WeekAvailabilityResponse getWeekAvailability() {
+        // {day: {times: count}
+        Map<LocalDate, Map<Timeslot, Integer>> weekAvailabilityMap = new HashMap<>();
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = LocalDate.now().plusDays(i);
+            weekAvailabilityMap.put(date, new HashMap<>());
+        }
+
+        Map<Integer, Map<LocalDate, List<Timeslot>>> courtAvailabilityMap = getCourtAvailability().getCourtAvailabilityMap();
+        for (Map<LocalDate, List<Timeslot>> dateMap : courtAvailabilityMap.values()) {
+            for (Map.Entry<LocalDate, List<Timeslot>> dateAndMap : dateMap.entrySet()) {
+                Map<Timeslot, Integer> timeAndCount = weekAvailabilityMap.get(dateAndMap.getKey());
+                for (Timeslot timeslot : dateAndMap.getValue()) {
+                    if (!timeAndCount.containsKey(timeslot)) {
+                        if (timeslot.isAvailable()) {
+                            timeAndCount.put(timeslot, 1);
+                        } else {
+                            timeAndCount.put(timeslot, 0);
+                        }
+                    } else {
+                        if (timeslot.isAvailable()) {
+                            timeAndCount.put(timeslot, timeAndCount.get(timeslot) + 1);
+                        }
+                    }
+                }
+            }
+        }
+        return new WeekAvailabilityResponse(weekAvailabilityMap);
+    }
+
 
 }

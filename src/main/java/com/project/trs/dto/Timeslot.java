@@ -2,11 +2,15 @@ package com.project.trs.dto;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.HashMap;
 
 public class Timeslot {
     private Timestamp startTime;
     private Timestamp endTime;
     private boolean available;
+
+    public Timeslot() {
+    }
 
     public Timeslot(Timestamp startTime, Timestamp endTime, boolean available) {
         this.startTime = startTime;
@@ -36,5 +40,14 @@ public class Timeslot {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        Timeslot second = (Timeslot) obj;
+        return this.startTime == second.getStartTime() && this.endTime == second.getEndTime();
     }
 }
