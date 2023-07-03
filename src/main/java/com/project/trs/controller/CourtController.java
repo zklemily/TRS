@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,33 +67,47 @@ public class CourtController {
     // get the availability of each hour over the next 7 days
     @GetMapping("/week-availability")
     public WeekAvailabilityResponse getWeekAvailability() {
-        // {day: {times: count}
-        Map<LocalDate, Map<Timeslot, Integer>> weekAvailabilityMap = new HashMap<>();
+        // {day: {timeslots}
+        Map<LocalDate, List<Timeslot>> weekAvailabilityMap = new HashMap<>();
         for (int i = 0; i < 7; i++) {
             LocalDate date = LocalDate.now().plusDays(i);
-            weekAvailabilityMap.put(date, new HashMap<>());
+            weekAvailabilityMap.put(date, new ArrayList<>());
         }
 
+        // get availability by court
         Map<Integer, Map<LocalDate, List<Timeslot>>> courtAvailabilityMap = getCourtAvailability().getCourtAvailabilityMap();
+
         for (Map<LocalDate, List<Timeslot>> dateMap : courtAvailabilityMap.values()) {
             for (Map.Entry<LocalDate, List<Timeslot>> dateAndMap : dateMap.entrySet()) {
-                Map<Timeslot, Integer> timeAndCount = weekAvailabilityMap.get(dateAndMap.getKey());
+                List<Timeslot> timeAndCount = weekAvailabilityMap.get(dateAndMap.getKey());
                 for (Timeslot timeslot : dateAndMap.getValue()) {
-                    if (!timeAndCount.containsKey(timeslot)) {
+                    Timeslot existingTimeslot = timeslotInList(timeAndCount, timeslot);
+                    if (existingTimeslot == null) {
+                        existingTimeslot = new Timeslot(timeslot.getStartTime(), timeslot.getEndTime(), timeslot.isAvailable());
                         if (timeslot.isAvailable()) {
-                            timeAndCount.put(timeslot, 1);
+                            existingTimeslot.setCount(1);
                         } else {
-                            timeAndCount.put(timeslot, 0);
+                            existingTimeslot.setCount(0);
                         }
+                        timeAndCount.add(existingTimeslot);
                     } else {
                         if (timeslot.isAvailable()) {
-                            timeAndCount.put(timeslot, timeAndCount.get(timeslot) + 1);
+                            existingTimeslot.setCount(existingTimeslot.getCount() + 1);
                         }
                     }
                 }
             }
         }
         return new WeekAvailabilityResponse(weekAvailabilityMap);
+    }
+
+    private Timeslot timeslotInList(List<Timeslot> timeslots, Timeslot timeslot) {
+        for (Timeslot t : timeslots) {
+            if (t.equals(timeslot)) {
+                return t;
+            }
+        }
+        return null;
     }
 
 
