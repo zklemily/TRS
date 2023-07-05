@@ -5,10 +5,6 @@
 }
 
 body {
-  background-image: url('./assets/tennis_court.jpg');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
   min-height: 100vh;
   display: flex;
   font-weight: 400;
@@ -45,7 +41,8 @@ html,
   display: flex;
   justify-content: center;
   flex-direction: column;
-  text-align: left;
+  align-items: center;
+  height: 100vh;
 }
 
 .auth-inner {
@@ -60,11 +57,6 @@ html,
   padding: 40px 55px 45px 55px;
   border-radius: 25px;
   transition: all 0.3s;
-}
-
-.auth-wrapper .form-control:focus {
-  border-color: #167bff;
-  box-shadow: none;
 }
 
 .auth-wrapper h3 {

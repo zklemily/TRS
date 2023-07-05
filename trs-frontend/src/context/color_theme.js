@@ -12,7 +12,7 @@ const theme = createTheme({
       light: '#ff7961',
       main: '#f44336',
       dark: '#ba000d',
-      contrastText: '#000',
+      contrastText: '#D3D8F2',
     },
   },
 });
