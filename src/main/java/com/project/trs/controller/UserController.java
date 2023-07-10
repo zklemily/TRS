@@ -4,6 +4,7 @@ import com.project.trs.model.user.User;
 import com.project.trs.service.UserService;
 import com.project.trs.service.UserServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -90,6 +91,20 @@ public class UserController {
         userService.saveUser(curUser);
 
         return ResponseEntity.ok("User is updated.");
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam("email") String email, @RequestParam("newPassword") String newPassword) {
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        }
+
+        // Update the user's password
+        user.setPassword(newPassword);
+        userService.saveUser(user);
+
+        return ResponseEntity.ok("Password reset successfully.");
     }
 
 

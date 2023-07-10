@@ -7,6 +7,7 @@ import { ThemeProvider } from '@mui/material/styles';
 
 import Login from './users/login'
 import SignUp from './users/signup'
+import Reset from './users/reset-password';
 import ResponsiveAppBar from './components/responsive_app_bar'
 import ColorTheme from './context/color_theme'
 
@@ -22,6 +23,7 @@ function App() {
                 <Route exact path="/" element={<Login />} />
                 <Route path="/" element={<Login />} />
                 <Route path="/sign-up" element={<SignUp />} />
+                <Route path="/reset-password" element={<Reset />} />
               </Routes>
             </div>
           </div>
