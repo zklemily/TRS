@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {AppBar, Box, Toolbar, Container, Button} from '@mui/material';
 import { Link } from 'react-router-dom'
-import '../App.css'
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import PennLogo from '../assets/Penn.png'
 
@@ -9,11 +8,11 @@ const pages = ['About', 'Membership', 'Programming'];
 
 
 function ResponsiveAppBar() {
-  const [anchorEleNav, setAnchorElNav] = React.useState(null);
+  // const [anchorEleNav, setAnchorElNav] = React.useState(null);
 
 
   const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
+    // setAnchorElNav(null);
   };
 
   return (
