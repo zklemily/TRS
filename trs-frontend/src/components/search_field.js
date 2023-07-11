@@ -8,7 +8,7 @@ import theme from '../context/color_theme';
 export default function SearchField() {
   return (
       <Autocomplete
-        style={{ padding: '20px'}}
+        fullWidth
         freeSolo
         disableClearable
         options={data.map((option) => option.title)}
@@ -20,10 +20,11 @@ export default function SearchField() {
               ...params.InputProps,
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{color: theme.palette.secondary.main}}/>
+                  <SearchIcon sx={{position: 'relative', left: 15, color: theme.palette.secondary.main}}/>
                 </InputAdornment>
               ),
               style: {
+                height: '45px',
                 borderRadius: "100px",
               }
             }}

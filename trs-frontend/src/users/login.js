@@ -53,7 +53,7 @@ export default function Login() {
       
       if (response.status === 200) {
         // Redirect to the user homepage
-        navigate(`/home`);
+        navigate('/home');
       } else {
         setError(response.data);
       }
