@@ -34,48 +34,57 @@ export default function Reset() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleResetPassword}>
-      <Grid container spacing={2}>
-      <Grid item xs={12}>
-          <TextField
-            required
-            fullWidth
-            label="Email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            required
-            fullWidth
-            type="password"
-            label="New Password"
-            name="newPassword"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
+    <div className='background-pic'>
+      <div className="auth-wrapper">
+        <div className="auth-inner">
+          <form onSubmit={handleResetPassword}>
+          <Box mb={4} textAlign="center">
+            <Typography variant="h4" component="h4" color="primary">
+              Reset Password
+            </Typography>
+          </Box>
+          <Grid container spacing={2}>
+          <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                label="Email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                type="password"
+                label="New Password"
+                name="newPassword"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              </Grid>
           </Grid>
-      </Grid>
-      <Box mt={4} textAlign="center">
-      <Button
-        style={{ height: '50px', fontSize: '18px' , borderRadius: '100px'}}
-        type="submit"
-        variant="contained"
-        color="primary"
-        fullWidth
-        disabled={
-          email === '' ||
-          newPassword === ''
-        }
-      >
-        Reset
-      </Button>
-    </Box>
-      </form>
-      {message && <p>{message}</p>}
+          <Box mt={4} textAlign="center">
+          <Button
+            style={{ height: '50px', fontSize: '18px' , borderRadius: '100px'}}
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={
+              email === '' ||
+              newPassword === ''
+            }
+          >
+            Reset
+          </Button>
+        </Box>
+          </form>
+          {message && <p>{message}</p>}
+        </div>
+      </div>
     </div>
   );
 };

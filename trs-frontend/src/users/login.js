@@ -115,7 +115,11 @@ export default function Login() {
             </Grid>
             <Box mt={1} textAlign="left">
               <FormControlLabel
-                control={<Checkbox sx={{ '& .MuiSvgIcon-root': { fontSize: 16} }} />}
+                control={
+                <Checkbox 
+                sx={{ '& .MuiSvgIcon-root': { fontSize: 16} }} 
+                />
+              }
                 label={<span style={{ fontSize: 14, fontWeight:'lighter'}}>Remember me</span>}
               />
             </Box>

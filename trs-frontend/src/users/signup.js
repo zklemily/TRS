@@ -91,7 +91,7 @@ export default function SignUp() {
         <div className="auth-inner">
           <form onSubmit={(e) => handleSubmit(e)}>
             <Box mb={4} textAlign="center">
-              <Typography variant="h3" component="h3" color="primary">
+              <Typography variant="h4" component="h4" color="primary">
                 Sign Up
               </Typography>
               <Typography variant="h7" component="h7" color="text.secondary">

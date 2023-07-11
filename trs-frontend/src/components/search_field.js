@@ -3,6 +3,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete from '@mui/material/Autocomplete';
 import SearchIcon from '@mui/icons-material/Search';
+import theme from '../context/color_theme';
 
 export default function SearchField() {
   return (
@@ -13,23 +14,30 @@ export default function SearchField() {
         options={data.map((option) => option.title)}
         renderInput={(params) => (
           <TextField 
+            color='secondary'
             {...params}
             InputProps={{
               ...params.InputProps,
-              type: '',
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{color: '#252B4D'}}/>
+                  <SearchIcon sx={{color: theme.palette.secondary.main}}/>
                 </InputAdornment>
               ),
+              style: {
+                borderRadius: "100px",
+              }
             }}
             size="small"
+            sx={{
+                '& input': {
+                  color: theme.palette.secondary.main,
+                },
+            }}
           />
         )}
       />
   );
 }
 
-// Top 100 films as rated by IMDb users. http://www.imdb.com/chart/top
 const data = [
 ];
