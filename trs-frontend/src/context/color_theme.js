@@ -11,6 +11,9 @@ const theme = createTheme({
     secondary: {
       light: '#F8F9FB',
       main: '#5F6D7E',
+    },
+    action: {
+      disabledBackground: '#D1D9E2',
     }
   },
 });
