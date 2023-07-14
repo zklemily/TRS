@@ -12,7 +12,7 @@ export default class ReservationUtils {
         const converted = this.convertTZ(curr, "US/Eastern");
         const diff = Math.floor((date - converted) / (1000 * 60 * 60 * 24));
 
-        return diff <= 7 && diff >= 0;
+        return diff <= 6 && diff >= 0;
     }
 
     static isDateBookable(date) {

@@ -77,12 +77,12 @@ const StyledWeekViewTimeTableCell = styled(DayView.TimeTableCell)(({
   theme: { palette },
   }) => ({
     [`&.${classes.unbookableCell}`]: {
-      backgroundColor: alpha(palette.action.disabledBackground, 0.4),
+      backgroundColor: alpha(palette.action.disabledBackground, 0.2),
       '&:hover': {
-        backgroundColor: alpha(palette.action.disabledBackground, 0.4),
+        backgroundColor: alpha(palette.action.disabledBackground, 0.2),
       },
       '&:focus': {
-        backgroundColor: alpha(palette.action.disabledBackground, 0.4),
+        backgroundColor: alpha(palette.action.disabledBackground, 0.2),
       },
     },
   }));
@@ -133,7 +133,7 @@ export default class CourtAvail extends React.PureComponent {
               cellDuration={60}
               startDayHour={7}
               endDayHour={23}
-              intervalCount={12}
+              intervalCount={7}
               timeTableCellComponent={TimeTableCell}
             />
             <Toolbar />
