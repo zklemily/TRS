@@ -59,7 +59,6 @@ export default function HomePage() {
           component={Link}
           to={content.url}
           selected={content.url === location.pathname}
-          fullWidth
           sx={{ 
             height: '50px',
             border: 'none', 
