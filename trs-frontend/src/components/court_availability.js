@@ -1,9 +1,14 @@
 import * as React from 'react';
 import moment from "moment-timezone";
 import { Box, ThemeProvider, Modal, Button, Grid, Paper} from '@mui/material';
-import { styled, alpha } from '@mui/material/styles';
+import { styled, alpha, } from '@mui/material/styles';
 
-import { ViewState } from '@devexpress/dx-react-scheduler';
+import { 
+  ViewState,
+  EditingState,
+  IntegratedEditing,
+} from '@devexpress/dx-react-scheduler';
+
 import {
   Scheduler,
   DayView,
@@ -13,6 +18,7 @@ import {
   TodayButton,
   AppointmentTooltip,
   AppointmentForm,
+  ConfirmationDialog,
 } from '@devexpress/dx-react-scheduler-material-ui';
 
 import {appointments} from '../demo-data/appointments';
@@ -53,27 +59,28 @@ const Appointment = ({
   </Appointments.Appointment>
 );
 
-const FormOverlay = () => (
-    <Modal>
-      <Paper>
-        <Grid container spacing={1} justify={"flex-end"}>
-          {/* delete should delete the appointment */}
-          <Button >DELETE</Button>
-        </Grid>
+// Define custom appointment form style
+const RootPaper = styled(Paper)(({ theme }) => ({
+  width: theme.spacing(50),
+  padding: `20px`,
+  margin: '0 auto',
+  transform: 'translateY(20%)',
+  msTransform: 'translateY(20%)',
+  borderRadius: '20px',
+}));
 
-        <div>Test</div>
-        <Grid container spacing={1} justify={"flex-end"}>
-          {/* Cancel  should close the modal */}
-          <Button>CANCEL</Button>
-          {/* CREATE should create the appointment */}
-          <Button>CREATE</Button>
-        </Grid>
-      </Paper>
+// Define custom appointment form overlay
+const FormOverlay = React.forwardRef(({ visible, onHide, children }, ref) => {
+
+  return (
+    <Modal open={visible} onClose={onHide}>
+      <RootPaper ref={ref}>{children}</RootPaper>
     </Modal>
+  );
+});
 
-);
-
-const StyledWeekViewTimeTableCell = styled(DayView.TimeTableCell)(({
+// styling the disabled cells
+const StyledDayViewTimeTableCell = styled(DayView.TimeTableCell)(({
   theme: { palette },
   }) => ({
     [`&.${classes.unbookableCell}`]: {
@@ -87,11 +94,20 @@ const StyledWeekViewTimeTableCell = styled(DayView.TimeTableCell)(({
     },
   }));
 
+
+
+// customize rules for selecting disabled cells 
 const TimeTableCell = (({ ...restProps }) => {
   const { startDate } = restProps;
+  const handleDoubleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
   if (!ReservationUtils.isWithinRange(startDate)) {
-    return <StyledWeekViewTimeTableCell {...restProps} className={classes.unbookableCell} />;
-  } return <StyledWeekViewTimeTableCell {...restProps} />;
+    return <StyledDayViewTimeTableCell {...restProps} className={classes.unbookableCell} onDoubleClick={handleDoubleClick}/>;
+  } 
+  
+  return <StyledDayViewTimeTableCell {...restProps} />;
 });
 
 export default class CourtAvail extends React.PureComponent {
@@ -103,6 +119,29 @@ export default class CourtAvail extends React.PureComponent {
       currentDate: moment.tz(currDate, "US/Eastern").format("YYYY-MM-DD"),
     };
     this.currentDateChange = (currentDate) => { this.setState({ currentDate }); };
+    this.commitChanges = this.commitChanges.bind(this);
+  }
+
+  commitChanges({ added, changed, deleted }) {
+    this.setState((state) => {
+      let { data } = state;
+      if (added) {
+        const startingAddedId =
+          data.length > 0 ? data[data.length - 1].id + 1 : 0;
+        data = [...data, { id: startingAddedId, ...added }];
+      }
+      if (changed) {
+        data = data.map((appointment) =>
+          changed[appointment.id]
+            ? { ...appointment, ...changed[appointment.id] }
+            : appointment
+        );
+      }
+      if (deleted !== undefined) {
+        data = data.filter((appointment) => appointment.id !== deleted);
+      }
+      return { data };
+    });
   }
 
   render() { 
@@ -145,6 +184,7 @@ export default class CourtAvail extends React.PureComponent {
               showOpenButton
             />
             <AppointmentForm
+            overlayComponent={FormOverlay}
             />
           </Scheduler>
         </Box>
