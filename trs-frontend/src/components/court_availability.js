@@ -1,10 +1,11 @@
 import * as React from 'react';
-import moment from "moment-timezone";
+import classNames from 'clsx';
 import { 
   FormControl,
   Select,
   MenuItem,
   ListSubheader,
+  Grid,
   TextField,
   Box, 
   ThemeProvider, 
@@ -18,20 +19,18 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Typography,
+  Autocomplete,
 } from '@mui/material';
 import {
    styled, 
    alpha, 
 } from '@mui/material/styles';
 
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-
-import AddIcon from '@mui/icons-material/Add';
 import Close from '@mui/icons-material/Close';
-import CalendarToday from '@mui/icons-material/CalendarToday';
 import Create from '@mui/icons-material/Create';
+import People from '@mui/icons-material/People';
+import Tennis from '@mui/icons-material/SportsBaseball';
 
 import { 
   ViewState,
@@ -56,7 +55,14 @@ import {appointments} from '../demo-data/appointments';
 import theme from '../context/color_theme';
 import ReservationUtils from '../utils/reservation_utils';
 
-const currDate = new Date();
+const currDate = ReservationUtils.convertTZ(new Date());
+const cellHeight = '100px';
+
+const users = [
+  'John Doe',
+  'John Wick',
+  'Yuxuan Xiong',
+]
 
 const PREFIX = 'TRS-court';
 
@@ -82,16 +88,17 @@ const classes = {
   text: `${PREFIX}-text`,
   container: `${PREFIX}-container`,
   unbookableCell: `${PREFIX}-unbookableCell`,
+  bookableCell: `${PREFIX}-bookableCell`,
+  timeLabel: `${PREFIX}-timeLabel`,
 };
 
 
 // styling appointment form components
 const StyledDiv = styled(Paper)(({ theme }) => ({
-  width: theme.spacing('30vw'),
+  width: '400px',
   padding: `20px`,
-  margin: '0 auto',
-  transform: 'translateY(20%)',
-  msTransform: 'translateY(20%)',
+  margin: 'auto',
+  transform: 'translateY(100%)',
   borderRadius: '20px',
   [`& .${classes.icon}`]: {
     margin: theme.spacing(2, 0),
@@ -126,7 +133,8 @@ const StyledDiv = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(0, 2),
   },
   [`& .${classes.button}`]: {
-    marginLeft: theme.spacing(2),
+    marginLeft: theme.spacing(1),
+    borderRadius: '5px',
   },
 }));
 const StyledFab = styled(Fab)(({ theme }) => ({
@@ -143,7 +151,7 @@ const StyledSaveButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   height: '50px',
   minWidth: '10vh',
-  borderRadius: '100px',
+  borderRadius: '5px',
   color: 'white',
   '&:hover': {
     backgroundColor: theme.palette.secondary.main,
@@ -173,6 +181,40 @@ const Appointment = ({children, style, ...restProps}) => (
   </Appointments.Appointment>
 );
 
+const StyledAppointmentContent = styled(Appointments.AppointmentContent)(({ theme: { palette } }) => ({
+  [`& .${classes.text}`]: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  [`& .${classes.content}`]: {
+    opacity: 0.7,
+  },
+  [`& .${classes.container}`]: {
+    width: '100%',
+    lineHeight: 1.2,
+    height: '100%',
+  }
+}));
+
+const AppointmentContent = (({data, ...restProps}) =>  {
+  return (
+    <StyledAppointmentContent {...restProps} data={data}>
+      <div className={classes.container}>
+        <div className={classes.text}>
+          {data.title}
+        </div>
+        <div className={classes.text}>
+          {ReservationUtils.formattedDate(data.startDate)} - {ReservationUtils.formattedDate(data.endDate)}
+        </div>
+        <div className={classNames(classes.text, classes.content)}>
+          {`with ${data.with}`}
+        </div>
+      </div>
+    </StyledAppointmentContent>
+  );
+});
+
 // Define custom appointment form style
 const RootPaper = styled(Paper)(({ theme }) => ({
   width: theme.spacing(50),
@@ -183,23 +225,12 @@ const RootPaper = styled(Paper)(({ theme }) => ({
   borderRadius: '20px',
 }));
 
-// Define custom appointment form overlay
-const FormOverlay = React.forwardRef(({ visible, onHide, children }, ref) => {
-
-  return (
-    <Modal open={visible} onClose={onHide}>
-      <RootPaper ref={ref} > 
-      {children}
-      </RootPaper>
-    </Modal>
-  );
-});
-
 // styling the disabled cells
 const StyledDayViewTimeTableCell = styled(DayView.TimeTableCell)(({
   theme: { palette },
   }) => ({
     [`&.${classes.unbookableCell}`]: {
+      height: cellHeight,
       backgroundColor: alpha(palette.action.disabledBackground, 0.2),
       '&:hover': {
         backgroundColor: alpha(palette.action.disabledBackground, 0.2),
@@ -207,6 +238,9 @@ const StyledDayViewTimeTableCell = styled(DayView.TimeTableCell)(({
       '&:focus': {
         backgroundColor: alpha(palette.action.disabledBackground, 0.2),
       },
+    },
+    [`&.${classes.bookableCell}`]: {
+      height: cellHeight,
     },
   }));
 
@@ -221,7 +255,24 @@ const TimeTableCell = (({ ...restProps }) => {
     return <StyledDayViewTimeTableCell {...restProps} className={classes.unbookableCell} onDoubleClick={handleDoubleClick}/>;
   } 
   
-  return <StyledDayViewTimeTableCell {...restProps} />;
+  return <StyledDayViewTimeTableCell {...restProps} className={classes.bookableCell}/>;
+});
+
+const StyledTimeLabel = styled(DayView.TimeScaleLabel) (() => ({
+  [`&.${classes.timeLabel}`]: {
+    height: cellHeight,
+    lineHeight: cellHeight,
+    "&:first-child": {
+      height: '50px'
+    },
+    "&:last-child": {
+      height: '50px'
+    }
+  },
+}));
+
+const TimeScaleLabel = (({ ...restProps }) => {
+  return <StyledTimeLabel {...restProps} className={classes.timeLabel}/>
 });
 
 // appointment form definition
@@ -303,18 +354,14 @@ class AppointmentFormContainerBasic extends React.PureComponent {
       className: classes.selectField,
     });
 
-    const pickerEditorProps = field => ({
-      // keyboard: true,
-      value: displayAppointmentData[field],
-      onChange: date => this.changeAppointment({
-        field: [field], changes: date ? date.toDate() : new Date(displayAppointmentData[field]),
+    const autocompleteProps = field => ({
+      onChange: ({ target: change }) => this.changeAppointment({
+        field: [field], changes: change.innerText,
       }),
-      ampm: false,
-      inputFormat: 'DD/MM/YYYY HH:mm',
-      onError: () => null,
+      value: displayAppointmentData[field],
+      className: classes.selectField,
     });
-    const startDatePickerProps = pickerEditorProps('startDate');
-    const endDatePickerProps = pickerEditorProps('endDate');
+
     const cancelChanges = () => {
       this.setState({
         appointmentChanges: {},
@@ -324,8 +371,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
     };
 
     return (
-      <Modal open={visible} onClose={onHide}
-      >
+      <Modal open={visible} onClose={onHide} >
         <StyledDiv>
           <div className={classes.header}>
             <IconButton className={classes.closeButton} onClick={cancelChanges} size="large">
@@ -333,47 +379,48 @@ class AppointmentFormContainerBasic extends React.PureComponent {
             </IconButton>
           </div>
           <div className={classes.content}>
-            <div className={classes.wrapper}>
-              <Create className={classes.icon} color="action" />
-              <FormControl sx={{ width: '100%', marginRight: 'auto' }}>
-                <Select
-                  {...selectProps('title')}
-                >
-                  <ListSubheader> Hamlin Outdoor Courts</ListSubheader>
-                  {Array.from({ length: 12 }, (_, index) => (
-                      <MenuItem key={`Outdoor Court ${index + 1}`} value={`Outdoor Court ${index + 1}`}>
-                        Court {index + 1}
-                      </MenuItem>
-                    ))}
-                  <ListSubheader> Hecht Indoor Courts </ListSubheader>
-                  {Array.from({ length: 12 }, (_, index) => (
-                      <MenuItem key={`Indoor Court ${index + 1}`} value={`Indoor Court ${index + 1}`}>
-                        Court {index + 1}
-                      </MenuItem>
-                    ))}
-
-                </Select>
-              </FormControl>
-            </div>
-            <div className={classes.wrapper}>
-              <CalendarToday className={classes.icon} color="action" />
-              <LocalizationProvider dateAdapter={AdapterMoment}>
-                <DateTimePicker
-                  label="Start Date"
-                  renderInput={
-                    props => <TextField className={classes.picker} {...props} />
-                  }
-                  {...startDatePickerProps}
-                />
-                <DateTimePicker
-                  label="End Date"
-                  renderInput={
-                    props => <TextField className={classes.picker} {...props} />
-                  }
-                  {...endDatePickerProps}
-                />
-              </LocalizationProvider>
-            </div>
+            <Grid container spacing={2} className={classes.wrapper}>
+              <Grid item>
+                <Tennis className={classes.icon} color="secondary"/>
+              </Grid>
+              <Grid item sx={{ marginRight: 'auto' }} xs={9} sm={0}>
+                  <Select
+                    native={false}
+                    displayEmpty={true}
+                    renderValue={(value) => {
+                      if (value == null) {
+                        return <Typography sx={{color: 'grey'}}>Pick a court</Typography>;
+                      }
+                      return value;
+                    }}
+                    {...selectProps('title')}
+                  >
+                    <ListSubheader> Hamlin Outdoor Courts</ListSubheader>
+                    {Array.from({ length: 12 }, (_, index) => (
+                        <MenuItem key={`Outdoor Court ${index + 1}`} value={`Outdoor Court ${index + 1}`}>
+                          Court {index + 1}
+                        </MenuItem>
+                      ))}
+                    <ListSubheader> Hecht Indoor Courts </ListSubheader>
+                    {Array.from({ length: 12 }, (_, index) => (
+                        <MenuItem key={`Indoor Court ${index + 1}`} value={`Indoor Court ${index + 1}`}>
+                          Court {index + 1}
+                        </MenuItem>
+                      ))}
+                  </Select>
+              </Grid>
+            </Grid>
+            <Grid container spacing={2} className={classes.wrapper}>
+              <Grid item><People className={classes.icon} color="secondary" /></Grid>
+              <Grid item sx={{ marginRight: 'auto' }} xs={9} sm={0}>
+              <Autocomplete
+                options={users}
+                renderInput={(params) => <TextField {...params} label="Player 2" />}
+                {...autocompleteProps('with')}
+              />
+              </Grid>
+            </Grid>
+            
           </div>
           <div className={classes.buttonGroup}>
             {!isNewAppointment && (
@@ -390,8 +437,9 @@ class AppointmentFormContainerBasic extends React.PureComponent {
               </Button>
             )}
             <Button
-              variant="outlined"
+              variant="contained"
               color="primary"
+              disableElevation={true}
               className={classes.button}
               onClick={() => {
                 visibleChange();
@@ -414,7 +462,7 @@ export default class CourtAvail extends React.PureComponent {
     
     this.state = {
       data: appointments,
-      currentDate: moment.tz(currDate, "US/Eastern").format("YYYY-MM-DD"),
+      currentDate: currDate,
       confirmationVisible: false,
       editingFormVisible: false,
       deletedAppointmentId: undefined,
@@ -541,7 +589,7 @@ export default class CourtAvail extends React.PureComponent {
             bgcolor: ``,
             border: `1px solid ${theme.palette.primary.light}`,
             borderRadius: '20px',
-            maxWidth: '60vw',
+            maxWidth: '65vw',
             minHeight: '78vh',
           }}
         >
@@ -566,11 +614,15 @@ export default class CourtAvail extends React.PureComponent {
               endDayHour={23}
               intervalCount={7}
               timeTableCellComponent={TimeTableCell}
+              timeScaleLabelComponent={TimeScaleLabel}
             />
             <Toolbar />
             <DateNavigator />
             <TodayButton />
-            <Appointments appointmentComponent={Appointment}/>
+            <Appointments 
+              appointmentContentComponent={AppointmentContent}
+              appointmentComponent={Appointment}
+            />
             <AppointmentTooltip
               showCloseButton
               showOpenButton
@@ -597,16 +649,16 @@ export default class CourtAvail extends React.PureComponent {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.toggleConfirmationVisible} color="primary" variant="outlined">
+              <Button onClick={this.toggleConfirmationVisible} color="secondary" variant="outlined" sx={{borderRadius: '5px'}} >
                 Cancel
               </Button>
-              <Button onClick={this.commitDeletedAppointment} color="secondary" variant="outlined">
+              <Button onClick={this.commitDeletedAppointment} color="primary" variant="contained" disableElevation={true} sx={{borderRadius: '5px'}}>
                 Delete
               </Button>
             </DialogActions>
           </Dialog>
 
-          <StyledFab
+          {/* <StyledFab
             color="primary"
             className={classes.addButton}
             onClick={() => {
@@ -614,13 +666,13 @@ export default class CourtAvail extends React.PureComponent {
               this.onEditingAppointmentChange(undefined);
               this.onAddedAppointmentChange({
                 // TODO by default set hours to next available hour (add function to utils)
-                startDate: new Date(currentDate).setHours(currDate.getHours()),
-                endDate: new Date(currentDate).setHours(currDate.getHours() + 1),
+                startDate: new Date(ReservationUtils.roundMinutes(currDate)),
+                endDate: new Date(currDate).setHours(currDate.getHours() + 1),
               });
             }}
           >
             <AddIcon />
-          </StyledFab>
+          </StyledFab> */}
         </Box>
       </ThemeProvider>
     );

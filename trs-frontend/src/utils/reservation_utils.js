@@ -19,4 +19,18 @@ export default class ReservationUtils {
         // TODO send request to backend to check if time available
         return true; 
     }
+
+    static roundMinutes(date) {
+        date.setHours(date.getHours() + Math.ceil(date.getMinutes()/60));
+        date.setMinutes(0, 0, 0);
+        return date;
+    }
+
+    static formattedDate(date) {
+        return date.toLocaleString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        });
+    }
 }
