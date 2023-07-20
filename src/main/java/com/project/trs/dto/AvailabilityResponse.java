@@ -22,22 +22,5 @@ public class AvailabilityResponse {
         this.courtAvailabilityMap = courtAvailabilityMap;
     }
 
-    //    private List<AvailabilityCourt> availabilityCourts;
-//
-//    public AvailabilityResponse() {
-//    }
-//
-//    public AvailabilityResponse(List<AvailabilityCourt> availabilityCourts) {
-//        this.availabilityCourts = availabilityCourts;
-//    }
-//
-//    public List<AvailabilityCourt> getAvailabilityCourts() {
-//        return availabilityCourts;
-//    }
-//
-//    public void setAvailabilityCourts(List<AvailabilityCourt> availabilityCourts) {
-//        this.availabilityCourts = availabilityCourts;
-//    }
-
 
 }
