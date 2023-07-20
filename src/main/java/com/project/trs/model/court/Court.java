@@ -32,4 +32,12 @@ public class Court {
     public void setCourtType(CourtType courtType) {
         this.courtType = courtType;
     }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 }
