@@ -77,22 +77,29 @@ public class CourtController {
         // get availability by court
         Map<Integer, Map<LocalDate, List<Timeslot>>> courtAvailabilityMap = getCourtAvailability().getCourtAvailabilityMap();
 
-        for (Map<LocalDate, List<Timeslot>> dateMap : courtAvailabilityMap.values()) {
-            for (Map.Entry<LocalDate, List<Timeslot>> dateAndMap : dateMap.entrySet()) {
+        for (Map.Entry<Integer, Map<LocalDate, List<Timeslot>>> dateMap : courtAvailabilityMap.entrySet()) {
+            int curCourt = dateMap.getKey();
+            for (Map.Entry<LocalDate, List<Timeslot>> dateAndMap : dateMap.getValue().entrySet()) {
                 List<Timeslot> timeAndCount = weekAvailabilityMap.get(dateAndMap.getKey());
                 for (Timeslot timeslot : dateAndMap.getValue()) {
                     Timeslot existingTimeslot = timeslotInList(timeAndCount, timeslot);
                     if (existingTimeslot == null) {
                         existingTimeslot = new Timeslot(timeslot.getStartTime(), timeslot.getEndTime(), timeslot.isAvailable());
+                        List<Integer> courts = existingTimeslot.getCourts();
                         if (timeslot.isAvailable()) {
                             existingTimeslot.setCount(1);
+                            courts.add(curCourt);
+                            existingTimeslot.setCourts(courts);
                         } else {
                             existingTimeslot.setCount(0);
                         }
                         timeAndCount.add(existingTimeslot);
                     } else {
+                        List<Integer> courts = existingTimeslot.getCourts();
                         if (timeslot.isAvailable()) {
                             existingTimeslot.setCount(existingTimeslot.getCount() + 1);
+                            courts.add(curCourt);
+                            existingTimeslot.setCourts(courts);
                         }
                     }
                 }
@@ -109,6 +116,4 @@ public class CourtController {
         }
         return null;
     }
-
-
 }

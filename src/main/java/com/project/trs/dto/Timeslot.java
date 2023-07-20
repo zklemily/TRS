@@ -2,7 +2,9 @@ package com.project.trs.dto;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class Timeslot {
@@ -10,6 +12,7 @@ public class Timeslot {
     private Timestamp endTime;
     private boolean available;
     private int count;
+    private List<Integer> courts;
 
     public Timeslot() {
     }
@@ -19,6 +22,7 @@ public class Timeslot {
         this.endTime = endTime;
         this.available = available;
         this.count = 1;
+        this.courts = new ArrayList<>();
     }
 
     public Timestamp getStartTime() {
@@ -53,6 +57,14 @@ public class Timeslot {
         this.count = count;
     }
 
+    public List<Integer> getCourts() {
+        return courts;
+    }
+
+    public void setCourts(List<Integer> courts) {
+        this.courts = courts;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -72,11 +84,5 @@ public class Timeslot {
         result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
         return result;
     }
-
-
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(startTime, endTime);
-//    }
 
 }
