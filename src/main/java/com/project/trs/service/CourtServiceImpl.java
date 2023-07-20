@@ -49,6 +49,11 @@ public class CourtServiceImpl implements CourtService {
     }
 
     @Override
+    public List<Court> getAvailableCourts(Timestamp start, Timestamp end) {
+        return courtRepository.findAvailableCourts(start, end);
+    }
+
+    @Override
     public List<Timeslot> getAvailabilityByDay(int courtId, LocalDate date) {
         // generate a list of start and end times
         List<LocalTime> times = new ArrayList<>();

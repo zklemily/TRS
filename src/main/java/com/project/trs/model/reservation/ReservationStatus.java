@@ -11,10 +11,10 @@ public class ReservationStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    private String status;
+
     @OneToMany(mappedBy = "resStatus")
     private List<Reservation> reservations;
-
-    private String status;
 
     public int getId() {
         return id;
