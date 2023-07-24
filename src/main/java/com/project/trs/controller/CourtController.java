@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,6 +110,32 @@ public class CourtController {
         }
         return new WeekAvailabilityResponse(weekAvailabilityMap);
     }
+
+    @GetMapping("/start-time/{start-time}")
+    public List<Integer> getAvailabilityByStartTime(@PathVariable("start-time") String startTime) {
+        List<Integer> courts = new ArrayList<>();
+        // use DateTimeFormatter to parse the startTime string
+        String modifiedStartTime = startTime.replaceFirst("(.*\\d\\d):(\\d\\d)$", "$1$2");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        LocalDateTime localDateTime = LocalDateTime.parse(modifiedStartTime, formatter);
+        // convert the LocalDateTime to a Timestamp
+        Timestamp start = Timestamp.valueOf(localDateTime);
+        // get all court availability
+        Map<Integer, Map<LocalDate, List<Timeslot>>> courtAvailabilityMap = getCourtAvailability().getCourtAvailabilityMap();
+        for (Map.Entry<Integer, Map<LocalDate, List<Timeslot>>> entry : courtAvailabilityMap.entrySet()) {
+            int curCourt = entry.getKey();
+            List<Timeslot> timeslots = entry.getValue().get(start.toLocalDateTime().toLocalDate());
+            for (Timeslot timeslot : timeslots) {
+                if (timeslot.getStartTime().equals(start) && timeslot.isAvailable()) {
+                    courts.add(curCourt);
+                }
+            }
+        }
+
+        return courts;
+
+    }
+
 
     private Timeslot timeslotInList(List<Timeslot> timeslots, Timeslot timeslot) {
         for (Timeslot t : timeslots) {
