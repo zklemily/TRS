@@ -22,6 +22,8 @@ public class User {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
+
+
     public int getId() {
         return id;
     }

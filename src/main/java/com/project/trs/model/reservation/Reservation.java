@@ -123,4 +123,21 @@ public class Reservation {
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "id=" + id +
+                ", user=" + user.getFirstName() +
+                ", guest=" + guest.getFirstName() +
+                ", court=" + court.getDisplayName() +
+                ", courtType=" + courtType +
+                ", resStatus=" + resStatus +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", price=" + price +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }
