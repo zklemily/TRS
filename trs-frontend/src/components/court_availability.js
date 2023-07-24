@@ -28,7 +28,6 @@ import {
 } from '@mui/material/styles';
 
 import Close from '@mui/icons-material/Close';
-import Create from '@mui/icons-material/Create';
 import People from '@mui/icons-material/People';
 import Tennis from '@mui/icons-material/SportsBaseball';
 
@@ -55,8 +54,10 @@ import {appointments} from '../demo-data/appointments';
 import theme from '../context/color_theme';
 import ReservationUtils from '../utils/reservation_utils';
 
-const currDate = ReservationUtils.convertTZ(new Date());
+const resUtils = new ReservationUtils();
+const currDate = resUtils.convertTZ(new Date());
 const cellHeight = '100px';
+
 
 const users = [
   'John Doe',
@@ -205,7 +206,7 @@ const AppointmentContent = (({data, ...restProps}) =>  {
           {data.title}
         </div>
         <div className={classes.text}>
-          {ReservationUtils.formattedDate(data.startDate)} - {ReservationUtils.formattedDate(data.endDate)}
+          {resUtils.formattedDate(data.startDate)} - {resUtils.formattedDate(data.endDate)}
         </div>
         <div className={classNames(classes.text, classes.content)}>
           {`with ${data.with}`}
@@ -244,6 +245,7 @@ const StyledDayViewTimeTableCell = styled(DayView.TimeTableCell)(({
     },
   }));
 
+
 // customize rules for selecting disabled cells 
 const TimeTableCell = (({ ...restProps }) => {
   const { startDate } = restProps;
@@ -251,7 +253,7 @@ const TimeTableCell = (({ ...restProps }) => {
     e.preventDefault();
     e.stopPropagation();
   };
-  if (!ReservationUtils.isWithinRange(startDate)) {
+  if (!resUtils.isWithinRange(startDate) || !resUtils.isDateBookable(startDate)) {
     return <StyledDayViewTimeTableCell {...restProps} className={classes.unbookableCell} onDoubleClick={handleDoubleClick}/>;
   } 
   
@@ -402,7 +404,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
                         </MenuItem>
                       ))}
                     <ListSubheader> Hecht Indoor Courts </ListSubheader>
-                    {Array.from({ length: 12 }, (_, index) => (
+                    {Array.from({ length: 8 }, (_, index) => (
                         <MenuItem key={`Indoor Court ${index + 1}`} value={`Indoor Court ${index + 1}`}>
                           Court {index + 1}
                         </MenuItem>
@@ -611,7 +613,7 @@ export default class CourtAvail extends React.PureComponent {
             <DayView
               cellDuration={60}
               startDayHour={7}
-              endDayHour={23}
+              endDayHour={22}
               intervalCount={7}
               timeTableCellComponent={TimeTableCell}
               timeScaleLabelComponent={TimeScaleLabel}
@@ -666,7 +668,7 @@ export default class CourtAvail extends React.PureComponent {
               this.onEditingAppointmentChange(undefined);
               this.onAddedAppointmentChange({
                 // TODO by default set hours to next available hour (add function to utils)
-                startDate: new Date(ReservationUtils.roundMinutes(currDate)),
+                startDate: new Date(resUtils.roundMinutes(currDate)),
                 endDate: new Date(currDate).setHours(currDate.getHours() + 1),
               });
             }}
