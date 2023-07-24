@@ -20,4 +20,8 @@ public class ReservationServiceHelper {
         List<Reservation> conflictReservations = reservationRepository.timeConflictingReservations(start, end);
         return conflictReservations.size() == courtRepository.count();
     }
+
+    public boolean hasExistingRes(int id, Timestamp start, Timestamp end) {
+        return reservationRepository.hasExistingReservation(id, start, end) > 0;
+    }
 }
