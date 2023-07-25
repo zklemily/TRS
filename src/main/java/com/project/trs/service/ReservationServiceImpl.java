@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -40,6 +41,19 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public List<Reservation> getAllReservation() {
         return reservationRepository.findAll();
+    }
+
+    @Override
+    public Reservation getReservationById(int id) {
+        return reservationRepository.findById(id).orElseThrow();
+    }
+
+    @Override
+    public List<Reservation> getReservationsByUserId(int id) {
+        List<Reservation> resOne = reservationRepository.findByUserId(id);
+        List<Reservation> resTwo = reservationRepository.findByGuestId(id);
+        resOne.addAll(resTwo);
+        return resOne;
     }
 
     @Override

@@ -20,6 +20,16 @@ public class ReservationController {
         return reservationService.getAllReservation();
     }
 
+    @GetMapping("/{reservation-id}")
+    public Reservation getReservationById(@PathVariable("reservation-id") int reservationId) {
+        return reservationService.getReservationById(reservationId);
+    }
+
+    @GetMapping("/user/{user-id}")
+    public List<Reservation> getReservationsByUserId(@PathVariable("user-id") int userId) {
+        return reservationService.getReservationsByUserId(userId);
+    }
+
     @PostMapping("")
     public Reservation createReservation(@RequestBody ReservationRequest reservationRequest) {
         return reservationService.addReservation(reservationRequest);
