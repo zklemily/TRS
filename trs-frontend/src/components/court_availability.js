@@ -55,11 +55,81 @@ import theme from '../context/color_theme';
 import ReservationUtils from '../utils/reservation_utils';
 
 const resUtils = new ReservationUtils();
-const currDate = resUtils.convertTZ(new Date());
+const currDate = resUtils.convertTZ(new Date(), "US/Eastern");
 const cellHeight = '100px';
 
+const useAllData = () => {
+  const [courtAvailability, setCourtAvailability] = React.useState();
+  const [users, setUsers] = React.useState();
 
-const users = [
+  React.useEffect(() => {
+    const dataFetch = async () => {
+      // waiting for allthethings in parallel
+      const result = (
+        await Promise.all([
+          fetch(`http://localhost:8080/courts/date-time-availability`),
+          fetch(`http://localhost:8080/users`),
+        ])
+      ).map((r) => r.json());
+
+      // and waiting a bit more - fetch API is cumbersome
+      const [courtAvailabilityResult, usersResult] = await Promise.all(
+        result
+      );
+
+      // when the data is ready, save it to state
+      setCourtAvailability(courtAvailabilityResult);
+      setUsers(usersResult);
+    };
+
+    dataFetch();
+  }, []);
+
+  return { courtAvailability, users };
+};
+
+const DataContext = React.createContext();
+
+export const DataProvider = ({ children }) => {
+  const data = useAllData();
+
+  return (
+    <DataContext.Provider value={data}>
+      {children}
+    </DataContext.Provider>
+  );
+};
+
+    
+// customize rules for selecting disabled cells 
+const TimeTableCell = (({ ...restProps }) => {
+  const { courtAvailability, users } = useAllData();
+  
+  const { startDate } = restProps;
+  const handleDoubleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  let isDateBookable = false; 
+  const converted = startDate.toISOString().slice(0, 16);
+  
+  for (const dateTime in courtAvailability) {
+    const dateTimeString = resUtils.convertTZ(dateTime, resUtils.getLocalTimeZone()).toISOString().slice(0, 16);
+    // if found the date-time of the current cell AND the court list is not empty
+    if (dateTimeString === converted && courtAvailability[dateTime].length !== 0) {
+      isDateBookable = true;
+    };
+  };
+  if (!resUtils.isWithinRange(startDate) || !isDateBookable) {
+    return <StyledDayViewTimeTableCell {...restProps} className={classes.unbookableCell} onDoubleClick={handleDoubleClick}/>;
+  } 
+  
+  return <StyledDayViewTimeTableCell {...restProps} className={classes.bookableCell}/>;
+});
+
+
+
+const testUsers = [
   'John Doe',
   'John Wick',
   'Yuxuan Xiong',
@@ -202,7 +272,7 @@ const AppointmentContent = (({data, ...restProps}) =>  {
   return (
     <StyledAppointmentContent {...restProps} data={data}>
       <div className={classes.container}>
-        <div className={classes.text}>
+        <div className={classes.text}>  
           {data.title}
         </div>
         <div className={classes.text}>
@@ -244,21 +314,6 @@ const StyledDayViewTimeTableCell = styled(DayView.TimeTableCell)(({
       height: cellHeight,
     },
   }));
-
-
-// customize rules for selecting disabled cells 
-const TimeTableCell = (({ ...restProps }) => {
-  const { startDate } = restProps;
-  const handleDoubleClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-  if (!resUtils.isWithinRange(startDate) || !resUtils.isDateBookable(startDate)) {
-    return <StyledDayViewTimeTableCell {...restProps} className={classes.unbookableCell} onDoubleClick={handleDoubleClick}/>;
-  } 
-  
-  return <StyledDayViewTimeTableCell {...restProps} className={classes.bookableCell}/>;
-});
 
 const StyledTimeLabel = styled(DayView.TimeScaleLabel) (() => ({
   [`&.${classes.timeLabel}`]: {
@@ -336,6 +391,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
       target,
       onHide,
     } = this.props;
+
     const { appointmentChanges } = this.state;
 
     const displayAppointmentData = {
@@ -352,7 +408,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
       onChange: ({ target: change }) => this.changeAppointment({
         field: [field], changes: change.value,
       }),
-      value: displayAppointmentData[field],
+      value: displayAppointmentData[field] ?? "Pick a court",
       className: classes.selectField,
     });
 
@@ -360,7 +416,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
       onChange: ({ target: change }) => this.changeAppointment({
         field: [field], changes: change.innerText,
       }),
-      value: displayAppointmentData[field],
+      value: displayAppointmentData[field] ?? "",
       className: classes.selectField,
     });
 
@@ -390,9 +446,6 @@ class AppointmentFormContainerBasic extends React.PureComponent {
                     native={false}
                     displayEmpty={true}
                     renderValue={(value) => {
-                      if (value == null) {
-                        return <Typography sx={{color: 'grey'}}>Pick a court</Typography>;
-                      }
                       return value;
                     }}
                     {...selectProps('title')}
@@ -416,7 +469,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
               <Grid item><People className={classes.icon} color="secondary" /></Grid>
               <Grid item sx={{ marginRight: 'auto' }} xs={9} sm={0}>
               <Autocomplete
-                options={users}
+                options={testUsers}
                 renderInput={(params) => <TextField {...params} label="Player 2" />}
                 {...autocompleteProps('with')}
               />
@@ -473,6 +526,7 @@ export default class CourtAvail extends React.PureComponent {
       addedAppointment: {},
       isNewAppointment: false,
     };
+
     this.toggleConfirmationVisible = this.toggleConfirmationVisible.bind(this);
     this.commitDeletedAppointment = this.commitDeletedAppointment.bind(this);
     this.toggleEditingFormVisibility = this.toggleEditingFormVisibility.bind(this);
@@ -511,6 +565,7 @@ export default class CourtAvail extends React.PureComponent {
         cancelAppointment,
       };
     });
+
   }
 
   currentDateChange(currentDate) {
