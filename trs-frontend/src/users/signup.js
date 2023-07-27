@@ -44,7 +44,7 @@ export default function SignUp() {
 
   const checkEmailExists = async (email) => {
     try {
-      const response = await axios.get(`http://localhost:8080/users/check-email=${email}`);
+      const response = await axios.get(`http://localhost:8080/users/check/email=${email}`);
       return response.data !== null;
     } catch (error) {
       console.error(error);
@@ -54,7 +54,7 @@ export default function SignUp() {
 
   const checkUsernameExists = async (username) => {
     try {
-      const response = await axios.get(`http://localhost:8080/users/check-username=${username}`);
+      const response = await axios.get(`http://localhost:8080/users/check/username=${username}`);
       return response.data !== null;
     } catch (error) {
       console.error(error);
@@ -155,7 +155,7 @@ export default function SignUp() {
                   label="Username"
                   name="username"
                   value={username}
-                  helperText= {usernameExists ? "This email already exists" : "Must be 5-12 characters, start with a letter"}
+                  helperText= {usernameExists ? "This username already exists" : "Must be 5-12 characters, start with a letter"}
                   error={(username !== '' && !/^[a-zA-Z][a-zA-Z0-9]{5,12}$/i.test(username)) || usernameExists}
                   onChange={(e) => handleInputChange(e)}
                 />

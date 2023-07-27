@@ -54,6 +54,8 @@ import {appointments} from '../demo-data/appointments';
 import theme from '../context/color_theme';
 import ReservationUtils from '../utils/reservation_utils';
 
+import { request, setAuthToken } from '../helpers/axios_helper';
+
 const resUtils = new ReservationUtils();
 const currDate = resUtils.convertTZ(new Date(), "US/Eastern");
 const cellHeight = '100px';
@@ -65,12 +67,11 @@ const useAllData = () => {
   React.useEffect(() => {
     const dataFetch = async () => {
       // waiting for allthethings in parallel
-      const result = (
+      const result = 
         await Promise.all([
-          fetch(`http://localhost:8080/courts/date-time-availability`),
-          fetch(`http://localhost:8080/users`),
-        ])
-      ).map((r) => r.json());
+          request("GET", `http://localhost:8080/courts/date-time-availability`),
+          request("GET", `http://localhost:8080/users`),
+        ]);
 
       // and waiting a bit more - fetch API is cumbersome
       const [courtAvailabilityResult, usersResult] = await Promise.all(
@@ -78,8 +79,8 @@ const useAllData = () => {
       );
 
       // when the data is ready, save it to state
-      setCourtAvailability(courtAvailabilityResult);
-      setUsers(usersResult);
+      setCourtAvailability(courtAvailabilityResult.data);
+      setUsers(usersResult.data);
     };
 
     dataFetch();
@@ -118,6 +119,7 @@ const TimeTableCell = (({ ...restProps }) => {
     // if found the date-time of the current cell AND the court list is not empty
     if (dateTimeString === converted && courtAvailability[dateTime].length !== 0) {
       isDateBookable = true;
+      break;
     };
   };
   if (!resUtils.isWithinRange(startDate) || !isDateBookable) {

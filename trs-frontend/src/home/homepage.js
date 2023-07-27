@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Box, Drawer, List, Typography, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, IconButton} from '@mui/material';
 
@@ -36,6 +36,21 @@ export default function HomePage() {
   const handleCancel = () => {
     setOpen(false);
   };
+
+  const [firstname, setFirstName] = useState('');
+
+  useEffect(() => {
+    const fetchUserName = async() => {
+      try {
+        const response = await request("GET", "http://localhost:8080/users/current")
+        setFirstName(response.data.firstName);
+      } catch (error) {
+        console.error("Error fetching user data: ", error);
+      }
+    }
+
+    fetchUserName();
+  }, []);
 
   let navigate = useNavigate();
   const handleLogout = async (e) => {
@@ -179,7 +194,7 @@ export default function HomePage() {
             <Toolbar></Toolbar>
             {/* TODO set name to be the user's name*/}
             <Toolbar>
-              <WelcomeMessage name='John'/>
+              <WelcomeMessage name={firstname}/>
             </Toolbar>
             <Toolbar>
               <CourtAvail />
