@@ -1,5 +1,6 @@
 import React, {  useState } from 'react';
 import axios from 'axios';
+import { request, setAuthToken } from '../helpers/axios_helper';
 import { useNavigate } from 'react-router-dom';
 import { Box, TextField, Button, Typography, Grid, Checkbox, FormControlLabel, Link} from '@mui/material';
 import PennImage from "../assets/tennis_center.png";
@@ -42,24 +43,48 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newUser = {
-      username,
-      password
-    };
 
-    try {
-      const response = await axios.post('http://localhost:8080/users/login', newUser);
-      console.log(response.data);
-      
-      if (response.status === 200) {
-        // Redirect to the user homepage
-        navigate('/home');
-      } else {
-        setError(response.data);
+    request(
+      "POST",
+      "/users/login",
+      {
+        username: username,
+        password: password
       }
-    } catch (error) {
-      console.error(error);
-    }
+    ).then(
+      (response) => {
+        setAuthToken(response.data.token);
+        navigate("/home");
+      }).catch(
+        (error) => {
+          console.error(error);
+          setAuthToken(null);
+          navigate("/");
+        }
+      )
+
+
+
+    // const newUser = {
+    //   username,
+    //   password
+    // };
+
+    
+
+    // try {
+    //   const response = await axios.post('http://localhost:8080/users/login', newUser);
+    //   console.log(response.data);
+      
+    //   if (response.status === 200) {
+    //     // Redirect to the user homepage
+    //     navigate('/home');
+    //   } else {
+    //     setError(response.data);
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    // }
   };
 
   return (

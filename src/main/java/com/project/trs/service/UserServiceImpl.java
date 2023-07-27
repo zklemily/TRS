@@ -7,8 +7,10 @@ import com.project.trs.repository.UserRepository;
 import com.project.trs.repository.UserTypeRepository;
 import com.project.trs.exception.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.CharBuffer;
 import java.util.List;
 
 @Service
@@ -19,6 +21,12 @@ public class UserServiceImpl implements UserService {
     private UserServiceHelper userServiceHelper;
     @Autowired
     private UserTypeRepository userTypeRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public User saveUser(User user) {
@@ -45,9 +53,12 @@ public class UserServiceImpl implements UserService {
 
         // Fetch the existing UserType based on the provided type
         UserType existingUserType = userTypeRepository.findByType(user.getUserType().getType());
-
         // Set the fetched UserType to the User entity
         user.setUserType(existingUserType);
+
+        // hash the password using password encoder
+        user.setPassword(passwordEncoder.encode(CharBuffer.wrap(user.getPassword())));
+
         return userRepository.save(user);
     }
 
@@ -82,11 +93,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User authenticateUser(String username, String password) {
         User user = userRepository.findByUsername(username);
-        if (user != null && user.getPassword().equals(password)) {
-            System.out.println("found user");
-            return user;
-        } else {
-            throw new AuthenticationException();
+        if (user != null) {
+            if (passwordEncoder.matches(CharBuffer.wrap(password), user.getPassword())) {
+                return user;
+            }
         }
+        throw new AuthenticationException();
     }
 }

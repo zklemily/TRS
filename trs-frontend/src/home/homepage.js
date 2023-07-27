@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Box, Drawer, List, Typography, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, IconButton} from '@mui/material';
 
+import { request, setAuthToken } from '../helpers/axios_helper';
+
 import HomeIcon from '@mui/icons-material/Home';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
@@ -39,6 +41,7 @@ export default function HomePage() {
   const handleLogout = async (e) => {
     // TODO logout logic here
     // Redirect to login page
+    setAuthToken(null);
     navigate('/');
   };
 

@@ -1,5 +1,8 @@
 package com.project.trs.controller;
 
+import com.project.trs.config.UserAuthenticationProvider;
+import com.project.trs.dto.UserDto;
+import com.project.trs.mapper.UserMapper;
 import com.project.trs.model.user.User;
 import com.project.trs.service.UserService;
 import com.project.trs.service.UserServiceHelper;
@@ -9,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -19,11 +23,20 @@ public class UserController {
     private UserService userService;
     @Autowired
     private UserServiceHelper userServiceHelper;
+    @Autowired
+    private UserMapper userMapper;
+    private final UserAuthenticationProvider userAuthenticationProvider;
+
+    public UserController(UserAuthenticationProvider userAuthenticationProvider) {
+        this.userAuthenticationProvider = userAuthenticationProvider;
+    }
 
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> register(@RequestBody User user) {
-        userService.registerUser(user);
-        return ResponseEntity.ok("User is added.");
+    public ResponseEntity<UserDto> register(@RequestBody User user) {
+        User savedUser = userService.registerUser(user);
+        UserDto userDto = userMapper.toUserDto(savedUser);
+        userDto.setToken(userAuthenticationProvider.createToken(userDto.getUsername()));
+        return ResponseEntity.created(URI.create("/users."+userDto.getId())).body(userDto);
     }
 
 //    maybe used in the future for batch update

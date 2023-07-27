@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { request, setAuthToken } from '../helpers/axios_helper';
 import { useNavigate } from 'react-router-dom';
 import { Box, TextField, Button, Typography, Grid, Link } from '@mui/material';
 import '../App.css';
@@ -64,25 +65,52 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newUser = {
-      firstName,
-      lastName,
-      username,
-      email,
-      password,
-      isActive,
-      userType,
-      createdAt,
-      updatedAt,
-    };
+    request(
+      "POST",
+      "/users",
+      {
+        firstName: firstName,
+        lastName: lastName,
+        username: username,
+        email: email,
+        password: password,
+        isActive: isActive,
+        userType: userType,
+        createdAt: createdAt,
+        updatedAt: updatedAt
+      }).then(
+        (response) => {
+          setAuthToken(response.data.token);
+          navigate('/');
+        }
+      ).catch(
+        (error) => {
+          setAuthToken(null);
+          console.error(error);
+          navigate('/');
+        }
+      )
+    
 
-    try {
-      const response = await axios.post('http://localhost:8080/users', newUser);
-      console.log(response.data);
-      navigate('/');
-    } catch (error) {
-      console.error(error);
-    }
+    // const newUser = {
+    //   firstName,
+    //   lastName,
+    //   username,
+    //   email,
+    //   password,
+    //   isActive,
+    //   userType,
+    //   createdAt,
+    //   updatedAt,
+    // };
+
+    // try {
+    //   const response = await axios.post('http://localhost:8080/users', newUser);
+    //   console.log(response.data);
+    //   navigate('/');
+    // } catch (error) {
+    //   console.error(error);
+    // }
   };
 
   return (
