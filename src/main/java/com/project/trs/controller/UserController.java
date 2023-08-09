@@ -136,5 +136,10 @@ public class UserController {
         return ResponseEntity.ok("Password reset successfully.");
     }
 
+    @GetMapping("/activate")
+    public ResponseEntity<String> activateAccount(@RequestParam String token) {
+        return null;
+    }
+
 
 }
