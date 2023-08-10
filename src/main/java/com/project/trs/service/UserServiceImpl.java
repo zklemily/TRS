@@ -1,17 +1,22 @@
 package com.project.trs.service;
 
 import com.project.trs.exception.UserNotFoundException;
+import com.project.trs.model.user.Token;
 import com.project.trs.model.user.User;
 import com.project.trs.model.user.UserType;
 import com.project.trs.repository.UserRepository;
 import com.project.trs.repository.UserTypeRepository;
 import com.project.trs.exception.AuthenticationException;
+import com.project.trs.utils.TokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.CharBuffer;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.project.trs.model.user.TokenType.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -21,6 +26,12 @@ public class UserServiceImpl implements UserService {
     private UserServiceHelper userServiceHelper;
     @Autowired
     private UserTypeRepository userTypeRepository;
+    @Autowired
+    private EmailSenderService emailSenderService;
+    @Autowired
+    private TokenService tokenService;
+    @Autowired
+    private TokenGenerator tokenGenerator;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -59,6 +70,15 @@ public class UserServiceImpl implements UserService {
         // hash the password using password encoder
         user.setPassword(passwordEncoder.encode(CharBuffer.wrap(user.getPassword())));
 
+        // send activation email
+        user.setIsActive(false);
+        String newToken = tokenGenerator.generateTokenWithTimestamp();
+        Token token = new Token(user, newToken, ACCOUNT_ACTIVATION, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15));
+        tokenService.saveToken(token);
+
+        String link = "http://localhost:8080/users/activate?token=" + newToken;
+        emailSenderService.sendEmail(user.getEmail(), "Activate Your Account", buildEmail(user.getFirstName(), link));
+
         return userRepository.save(user);
     }
 
@@ -91,6 +111,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public int activateUser(String email) {
+        return userRepository.activateUser(email);
+    }
+
+    @Override
     public User authenticateUser(String username, String password) {
         User user = userRepository.findByUsername(username);
         if (user != null) {
@@ -99,5 +124,74 @@ public class UserServiceImpl implements UserService {
             }
         }
         throw new AuthenticationException();
+    }
+
+    private String buildEmail(String name, String link) {
+        return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
+                "\n" +
+                "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>\n" +
+                "\n" +
+                "  <table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n" +
+                "    <tbody><tr>\n" +
+                "      <td width=\"100%\" height=\"53\" bgcolor=\"#0b0c0c\">\n" +
+                "        \n" +
+                "        <table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;max-width:580px\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\">\n" +
+                "          <tbody><tr>\n" +
+                "            <td width=\"70\" bgcolor=\"#0b0c0c\" valign=\"middle\">\n" +
+                "                <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">\n" +
+                "                  <tbody><tr>\n" +
+                "                    <td style=\"padding-left:10px\">\n" +
+                "                  \n" +
+                "                    </td>\n" +
+                "                    <td style=\"font-size:28px;line-height:1.315789474;Margin-top:4px;padding-left:10px\">\n" +
+                "                      <span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Confirm your email</span>\n" +
+                "                    </td>\n" +
+                "                  </tr>\n" +
+                "                </tbody></table>\n" +
+                "              </a>\n" +
+                "            </td>\n" +
+                "          </tr>\n" +
+                "        </tbody></table>\n" +
+                "        \n" +
+                "      </td>\n" +
+                "    </tr>\n" +
+                "  </tbody></table>\n" +
+                "  <table role=\"presentation\" class=\"m_-6186904992287805515content\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">\n" +
+                "    <tbody><tr>\n" +
+                "      <td width=\"10\" height=\"10\" valign=\"middle\"></td>\n" +
+                "      <td>\n" +
+                "        \n" +
+                "                <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">\n" +
+                "                  <tbody><tr>\n" +
+                "                    <td bgcolor=\"#1D70B8\" width=\"100%\" height=\"10\"></td>\n" +
+                "                  </tr>\n" +
+                "                </tbody></table>\n" +
+                "        \n" +
+                "      </td>\n" +
+                "      <td width=\"10\" valign=\"middle\" height=\"10\"></td>\n" +
+                "    </tr>\n" +
+                "  </tbody></table>\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "  <table role=\"presentation\" class=\"m_-6186904992287805515content\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">\n" +
+                "    <tbody><tr>\n" +
+                "      <td height=\"30\"><br></td>\n" +
+                "    </tr>\n" +
+                "    <tr>\n" +
+                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
+                "      <td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">\n" +
+                "        \n" +
+                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Thank you for registering. Please click on the below link to activate your account: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\"" + link + "\">Activate Now</a> </p></blockquote>\n Link will expire in 15 minutes. <p>See you soon</p>" +
+                "        \n" +
+                "      </td>\n" +
+                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
+                "    </tr>\n" +
+                "    <tr>\n" +
+                "      <td height=\"30\"><br></td>\n" +
+                "    </tr>\n" +
+                "  </tbody></table><div class=\"yj6qo\"></div><div class=\"adL\">\n" +
+                "\n" +
+                "</div></div>";
     }
 }

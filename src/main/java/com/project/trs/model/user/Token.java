@@ -17,7 +17,7 @@ public class Token {
     private TokenType tokenType;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
-
+    private LocalDateTime confirmedAt;
     public Token() {
     }
 
@@ -75,5 +75,13 @@ public class Token {
 
     public void setExpiresAt(LocalDateTime expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    public LocalDateTime getConfirmedAt() {
+        return confirmedAt;
+    }
+
+    public void setConfirmedAt(LocalDateTime confirmedAt) {
+        this.confirmedAt = confirmedAt;
     }
 }

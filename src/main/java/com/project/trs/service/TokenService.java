@@ -8,4 +8,6 @@ public interface TokenService {
     public void saveToken(Token token);
 
     public Optional<Token> getToken(String token);
+
+    public int setConfirmedAt(String token);
 }

@@ -18,4 +18,5 @@ public interface UserService {
     public User authenticateUser(String username, String password);
 
     public User getUserByUsername(String username);
+    public int activateUser(String email);
 }

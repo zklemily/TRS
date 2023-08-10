@@ -3,7 +3,9 @@ package com.project.trs.controller;
 import com.project.trs.config.UserAuthenticationProvider;
 import com.project.trs.dto.UserDto;
 import com.project.trs.mapper.UserMapper;
+import com.project.trs.model.user.Token;
 import com.project.trs.model.user.User;
+import com.project.trs.service.TokenService;
 import com.project.trs.service.UserService;
 import com.project.trs.service.UserServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,6 +30,8 @@ public class UserController {
     private UserServiceHelper userServiceHelper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private TokenService tokenService;
     private final UserAuthenticationProvider userAuthenticationProvider;
 
     public UserController(UserAuthenticationProvider userAuthenticationProvider) {
@@ -40,15 +45,6 @@ public class UserController {
         userDto.setToken(userAuthenticationProvider.createToken(userDto.getUsername()));
         return ResponseEntity.created(URI.create("/users."+userDto.getId())).body(userDto);
     }
-
-//    maybe used in the future for batch update
-//    @PostMapping("/batch")
-//    public ResponseEntity<String> register(@RequestBody List<User> users) {
-//        for (User u : users) {
-//            userService.registerUser(u);
-//        }
-//        return ResponseEntity.ok("Users are added.");
-//    }
 
     @GetMapping("")
     public List<User> getAllUsers() {
@@ -138,7 +134,21 @@ public class UserController {
 
     @GetMapping("/activate")
     public ResponseEntity<String> activateAccount(@RequestParam String token) {
-        return null;
+        Token confirmToken = tokenService.getToken(token).orElseThrow(()->new IllegalStateException("Token not found."));
+
+        if (confirmToken.getConfirmedAt() != null) {
+            throw new IllegalStateException("Email already activated.");
+        }
+        LocalDateTime expiredAt = confirmToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Token expired.");
+        }
+
+        tokenService.setConfirmedAt(token);
+
+        userService.activateUser(confirmToken.getUser().getEmail());
+
+        return ResponseEntity.ok("User is activated");
     }
 
 
