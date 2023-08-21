@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(HttpMethod.POST, "/users/login", "/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/check/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/activate/**").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/users/**").permitAll() // need this line for testing emails
                         .anyRequest().authenticated());
         return http.build();
     }

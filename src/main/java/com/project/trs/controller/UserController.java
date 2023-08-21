@@ -118,7 +118,7 @@ public class UserController {
         return ResponseEntity.ok("User is updated.");
     }
 
-    @PutMapping("/forgot-password")
+    @GetMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
         userService.forgotPassword(email);
         return ResponseEntity.ok("Reset password link is sent.");
