@@ -118,22 +118,33 @@ public class UserController {
         return ResponseEntity.ok("User is updated.");
     }
 
+    @PutMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
+        userService.forgotPassword(email);
+        return ResponseEntity.ok("Reset password link is sent.");
+    }
+
     @PutMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam("email") String email, @RequestParam("newPassword") String newPassword) {
-        User user = userService.getUserByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+    public ResponseEntity<String> resetPassword(@RequestParam("email") String email, @RequestParam("token") String token, @RequestHeader("newPassword") String newPassword) {
+        Token confirmToken = tokenService.getToken(token).orElseThrow(()->new IllegalStateException("Token not found."));
+
+        if (confirmToken.getConfirmedAt() != null) {
+            throw new IllegalStateException("Password already reset.");
+        }
+        LocalDateTime expiredAt = confirmToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Token expired.");
         }
 
-        // Update the user's password
-        user.setPassword(newPassword);
-        userService.saveUser(user);
+        tokenService.setConfirmedAt(token);
+
+        userService.setPassword(email, newPassword);
 
         return ResponseEntity.ok("Password reset successfully.");
     }
 
     @GetMapping("/activate")
-    public ResponseEntity<String> activateAccount(@RequestParam String token) {
+    public ResponseEntity<String> activateAccount(@RequestParam("token") String token) {
         Token confirmToken = tokenService.getToken(token).orElseThrow(()->new IllegalStateException("Token not found."));
 
         if (confirmToken.getConfirmedAt() != null) {

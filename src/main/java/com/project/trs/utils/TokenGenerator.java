@@ -1,9 +1,12 @@
 package com.project.trs.utils;
 
+import org.springframework.context.annotation.Bean;
+
 import java.security.SecureRandom;
 import java.util.Base64;
 
 public class TokenGenerator {
+
     private static final int TOKEN_LENGTH = 32; // Token length in bytes
 
     public String generateTokenWithTimestamp() {
