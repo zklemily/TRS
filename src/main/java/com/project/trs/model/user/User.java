@@ -22,7 +22,21 @@ public class User {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
+    public User() {
+    }
 
+    public User(int id, UserType userType, String firstName, String lastName, String username, String password, String email, boolean isActive, Timestamp createdAt, Timestamp updatedAt) {
+        this.id = id;
+        this.userType = userType;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.isActive = isActive;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     public int getId() {
         return id;
@@ -102,5 +116,10 @@ public class User {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return username;
     }
 }

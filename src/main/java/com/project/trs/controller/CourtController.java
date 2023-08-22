@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,28 +112,41 @@ public class CourtController {
         return new WeekAvailabilityResponse(weekAvailabilityMap);
     }
 
-    @GetMapping("/start-time/{start-time}")
-    public List<Integer> getAvailabilityByStartTime(@PathVariable("start-time") String startTime) {
-        List<Integer> courts = new ArrayList<>();
-        // use DateTimeFormatter to parse the startTime string
-        String modifiedStartTime = startTime.replaceFirst("(.*\\d\\d):(\\d\\d)$", "$1$2");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-        LocalDateTime localDateTime = LocalDateTime.parse(modifiedStartTime, formatter);
-        // convert the LocalDateTime to a Timestamp
-        Timestamp start = Timestamp.valueOf(localDateTime);
-        // get all court availability
-        Map<Integer, Map<LocalDate, List<Timeslot>>> courtAvailabilityMap = getCourtAvailability().getCourtAvailabilityMap();
-        for (Map.Entry<Integer, Map<LocalDate, List<Timeslot>>> entry : courtAvailabilityMap.entrySet()) {
-            int curCourt = entry.getKey();
-            List<Timeslot> timeslots = entry.getValue().get(start.toLocalDateTime().toLocalDate());
-            for (Timeslot timeslot : timeslots) {
-                if (timeslot.getStartTime().equals(start) && timeslot.isAvailable()) {
-                    courts.add(curCourt);
-                }
+    // get the list of available courts of each date-time over the next 7 days
+    @GetMapping("/date-time-availability")
+    public Map<LocalDateTime, List<Court>> getDateTimeAvailability() {
+        // {date-time: {timeslots}
+        Map<LocalDateTime, List<Court>> ret = new HashMap<>();
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = LocalDate.now().plusDays(i);
+            for (int j = 7; j < 22; j++) {
+                LocalDateTime slot = LocalDateTime.of(date, LocalTime.of(j, 0));
+                ret.put(slot, new ArrayList<>());
             }
         }
 
-        return courts;
+        // get list of courts for each date-time
+        for (LocalDateTime currDateTime : ret.keySet()) {
+            List<Court> currList = ret.get(currDateTime);
+            Timestamp start = Timestamp.valueOf(currDateTime);
+            Timestamp end = Timestamp.valueOf(currDateTime.plusHours(1));
+            currList.addAll(courtService.getAvailableCourts(start, end));
+        }
+
+        return ret;
+    }
+
+    @GetMapping("/start-time/{start-time}")
+    public List<Court> getAvailabilityByStartTime(@PathVariable("start-time") String startTime) {
+        // use DateTimeFormatter to parse the startTime string
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+        LocalDateTime localDateTime = LocalDateTime.parse(startTime, formatter);
+        // convert the LocalDateTime to a Timestamp
+        Timestamp start = Timestamp.valueOf(localDateTime);
+        Timestamp end = Timestamp.valueOf(localDateTime.plusHours(1));
+        // get all court availability
+
+        return courtService.getAvailableCourts(start, end);
 
     }
 

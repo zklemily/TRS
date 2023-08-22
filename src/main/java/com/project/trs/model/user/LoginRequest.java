@@ -1,5 +1,7 @@
 package com.project.trs.model.user;
 
+import com.project.trs.service.UserService;
+
 public class LoginRequest {
 
     public LoginRequest() {
