@@ -1,17 +1,22 @@
 package com.project.trs.service;
 
 import com.project.trs.exception.UserNotFoundException;
+import com.project.trs.model.user.Token;
 import com.project.trs.model.user.User;
 import com.project.trs.model.user.UserType;
 import com.project.trs.repository.UserRepository;
 import com.project.trs.repository.UserTypeRepository;
 import com.project.trs.exception.AuthenticationException;
+import com.project.trs.utils.TokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.CharBuffer;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.project.trs.model.user.TokenType.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -21,10 +26,16 @@ public class UserServiceImpl implements UserService {
     private UserServiceHelper userServiceHelper;
     @Autowired
     private UserTypeRepository userTypeRepository;
+    @Autowired
+    private EmailSenderService emailSenderService;
+    private final TokenService tokenService;
+    private final TokenGenerator tokenGenerator;
 
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(TokenService tokenService, TokenGenerator tokenGenerator, PasswordEncoder passwordEncoder) {
+        this.tokenService = tokenService;
+        this.tokenGenerator = tokenGenerator;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -59,7 +70,19 @@ public class UserServiceImpl implements UserService {
         // hash the password using password encoder
         user.setPassword(passwordEncoder.encode(CharBuffer.wrap(user.getPassword())));
 
-        return userRepository.save(user);
+        // send activation email
+        user.setIsActive(false);
+
+        userRepository.save(user);
+
+        String newToken = tokenGenerator.generateTokenWithTimestamp();
+        Token token = new Token(user, newToken, ACCOUNT_ACTIVATION, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15));
+        tokenService.saveToken(token);
+
+        String link = "http://localhost:8080/users/activate?token=" + newToken;
+        emailSenderService.sendActivationEmail(user.getEmail(), "Activate Your Account", user.getFirstName(), link);
+
+        return user;
     }
 
     @Override
@@ -88,6 +111,33 @@ public class UserServiceImpl implements UserService {
             return user;
         }
         throw new UserNotFoundException(username);
+    }
+
+    @Override
+    public int activateUser(String email) {
+        return userRepository.activateUser(email);
+    }
+
+    @Override
+    public User setPassword(String email, String newPassword) {
+        User user = getUserByEmail(email);
+        user.setPassword(newPassword);
+        userRepository.save(user);
+        return user;
+    }
+
+    @Override
+    public User forgotPassword(String email) {
+        User user = getUserByEmail(email);
+        String newToken = tokenGenerator.generateTokenWithTimestamp();
+        Token token = new Token(user, newToken, PASSWORD_RESET, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15));
+        tokenService.saveToken(token);
+
+        String link = "http://localhost:8080/users/reset-password?email=" + email + "&token=" + token;
+
+        emailSenderService.sendResetPasswordEmail(email, "Reset Your Password", user.getFirstName(), link);
+
+        return user;
     }
 
     @Override

@@ -3,7 +3,9 @@ package com.project.trs.controller;
 import com.project.trs.config.UserAuthenticationProvider;
 import com.project.trs.dto.UserDto;
 import com.project.trs.mapper.UserMapper;
+import com.project.trs.model.user.Token;
 import com.project.trs.model.user.User;
+import com.project.trs.service.TokenService;
 import com.project.trs.service.UserService;
 import com.project.trs.service.UserServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,6 +30,8 @@ public class UserController {
     private UserServiceHelper userServiceHelper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private TokenService tokenService;
     private final UserAuthenticationProvider userAuthenticationProvider;
 
     public UserController(UserAuthenticationProvider userAuthenticationProvider) {
@@ -40,15 +45,6 @@ public class UserController {
         userDto.setToken(userAuthenticationProvider.createToken(userDto.getUsername()));
         return ResponseEntity.created(URI.create("/users."+userDto.getId())).body(userDto);
     }
-
-//    maybe used in the future for batch update
-//    @PostMapping("/batch")
-//    public ResponseEntity<String> register(@RequestBody List<User> users) {
-//        for (User u : users) {
-//            userService.registerUser(u);
-//        }
-//        return ResponseEntity.ok("Users are added.");
-//    }
 
     @GetMapping("")
     public List<User> getAllUsers() {
@@ -122,18 +118,48 @@ public class UserController {
         return ResponseEntity.ok("User is updated.");
     }
 
+    @GetMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
+        userService.forgotPassword(email);
+        return ResponseEntity.ok("Reset password link is sent.");
+    }
+
     @PutMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam("email") String email, @RequestParam("newPassword") String newPassword) {
-        User user = userService.getUserByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+    public ResponseEntity<String> resetPassword(@RequestParam("email") String email, @RequestParam("token") String token, @RequestHeader("newPassword") String newPassword) {
+        Token confirmToken = tokenService.getToken(token).orElseThrow(()->new IllegalStateException("Token not found."));
+
+        if (confirmToken.getConfirmedAt() != null) {
+            throw new IllegalStateException("Password already reset.");
+        }
+        LocalDateTime expiredAt = confirmToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Token expired.");
         }
 
-        // Update the user's password
-        user.setPassword(newPassword);
-        userService.saveUser(user);
+        tokenService.setConfirmedAt(token);
+
+        userService.setPassword(email, newPassword);
 
         return ResponseEntity.ok("Password reset successfully.");
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<String> activateAccount(@RequestParam("token") String token) {
+        Token confirmToken = tokenService.getToken(token).orElseThrow(()->new IllegalStateException("Token not found."));
+
+        if (confirmToken.getConfirmedAt() != null) {
+            throw new IllegalStateException("Email already activated.");
+        }
+        LocalDateTime expiredAt = confirmToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Token expired.");
+        }
+
+        tokenService.setConfirmedAt(token);
+
+        userService.activateUser(confirmToken.getUser().getEmail());
+
+        return ResponseEntity.ok("User is activated");
     }
 
 

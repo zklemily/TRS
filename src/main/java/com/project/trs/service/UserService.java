@@ -18,4 +18,10 @@ public interface UserService {
     public User authenticateUser(String username, String password);
 
     public User getUserByUsername(String username);
+
+    public int activateUser(String email);
+
+    public User setPassword(String email, String newPassword);
+
+    public User forgotPassword(String email);
 }
