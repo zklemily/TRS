@@ -133,7 +133,7 @@ public class UserServiceImpl implements UserService {
         Token token = new Token(user, newToken, PASSWORD_RESET, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15));
         tokenService.saveToken(token);
 
-        String link = "http://localhost:8080/users/reset-password?email=" + email + "&token=" + token;
+        String link = "http://localhost:3000/reset-password?email=" + email + "&token=" + token.getToken();
 
         emailSenderService.sendResetPasswordEmail(email, "Reset Your Password", user.getFirstName(), link);
 

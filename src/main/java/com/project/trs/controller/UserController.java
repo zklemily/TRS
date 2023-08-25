@@ -120,12 +120,14 @@ public class UserController {
 
     @GetMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
+        System.out.println("TEST!!! I'M HERE!!!!!!!");
         userService.forgotPassword(email);
         return ResponseEntity.ok("Reset password link is sent.");
     }
 
     @PutMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam("email") String email, @RequestParam("token") String token, @RequestHeader("newPassword") String newPassword) {
+    public ResponseEntity<String> resetPassword(@RequestParam("email") String email, @RequestParam("token") String token, @RequestBody String newPassword) {
+        System.out.println("TEST!!! I'M HERE!!!");
         Token confirmToken = tokenService.getToken(token).orElseThrow(()->new IllegalStateException("Token not found."));
 
         if (confirmToken.getConfirmedAt() != null) {

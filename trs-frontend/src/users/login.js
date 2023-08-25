@@ -1,5 +1,4 @@
 import React, {  useState } from 'react';
-import axios from 'axios';
 import { request, setAuthToken } from '../helpers/axios_helper';
 import { useNavigate } from 'react-router-dom';
 import { Box, TextField, Button, Typography, Grid, Checkbox, FormControlLabel, Link} from '@mui/material';
@@ -16,7 +15,7 @@ export default function Login() {
 
   const { username, password } = user;
 
-  const [formError, setError] = useState('');
+  const [formError] = useState('');
 
   // const [emailExists, setEmailExists] = useState(false);
 
@@ -165,7 +164,7 @@ export default function Login() {
           </Box>
           <Box mt={1} textAlign="center">
             <Typography variant="body2" component="body2">
-                <Link href="/reset-password" color="text.secondary" underline="hover"> Forgot password? </Link>
+                <Link href="/send-reset-link" color="text.secondary" underline="hover"> Forgot password? </Link>
             </Typography>
           </Box>
       

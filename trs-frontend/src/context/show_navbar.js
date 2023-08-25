@@ -7,7 +7,7 @@ const ShowNavbar = ({children}) => {
     const [showNavbar, setShowNavbar] = useState(true);
 
     useEffect(() => {
-        if (location.pathname === '/' || location.pathname === '/sign-up' || location.pathname === '/reset-password') {
+        if (location.pathname === '/' || location.pathname === '/sign-up' || location.pathname === '/reset-password' || '/send-reset-link') {
             setShowNavbar(true);
         } else {
             setShowNavbar(false);

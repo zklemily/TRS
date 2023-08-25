@@ -10,7 +10,8 @@ import HomePage from './home/homepage';
 import ResponsiveAppBar from './components/responsive_app_bar';
 import ColorTheme from './context/color_theme';
 import ShowNavbar from './context/show_navbar';
-import Reset from './users/reset-password';
+import Reset from'./users/reset-password';
+import SendResetLink from './users/send-reset-link';
 
 function App() {
   return (
@@ -23,7 +24,8 @@ function App() {
           <Routes>
             <Route exact path="/" element={<Login />} />
             <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/reset-password" element={<Reset />} />
+            <Route path="/send-reset-link" element={<SendResetLink />} />
+            <Route path="/reset-password/*" element={<Reset />} />
             <Route path="/home" element={<HomePage />} />
           </Routes>
         </div>
