@@ -7,6 +7,6 @@ public class UserNotFoundException extends RuntimeException {
 
     public UserNotFoundException(String credential) {
         // any string credential, e.g. username, email
-        super("Could not find the user with credential" + credential);
+        super("Could not find the user with credential " + credential);
     }
 }

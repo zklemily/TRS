@@ -19,7 +19,7 @@ public interface UserService {
 
     public User getUserByUsername(String username);
 
-    public int activateUser(String email);
+    public int activateUser(String email, String token);
 
     public User setPassword(String email, String newPassword);
 

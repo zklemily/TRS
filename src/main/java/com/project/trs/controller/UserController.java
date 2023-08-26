@@ -32,17 +32,15 @@ public class UserController {
     private UserMapper userMapper;
     @Autowired
     private TokenService tokenService;
-    private final UserAuthenticationProvider userAuthenticationProvider;
 
-    public UserController(UserAuthenticationProvider userAuthenticationProvider) {
-        this.userAuthenticationProvider = userAuthenticationProvider;
+    public UserController() {
     }
 
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDto> register(@RequestBody User user) {
         User savedUser = userService.registerUser(user);
         UserDto userDto = userMapper.toUserDto(savedUser);
-        userDto.setToken(userAuthenticationProvider.createToken(userDto.getUsername()));
+
         return ResponseEntity.created(URI.create("/users."+userDto.getId())).body(userDto);
     }
 
@@ -120,14 +118,12 @@ public class UserController {
 
     @GetMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
-        System.out.println("TEST!!! I'M HERE!!!!!!!");
         userService.forgotPassword(email);
         return ResponseEntity.ok("Reset password link is sent.");
     }
 
     @PutMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestParam("email") String email, @RequestParam("token") String token, @RequestBody String newPassword) {
-        System.out.println("TEST!!! I'M HERE!!!");
         Token confirmToken = tokenService.getToken(token).orElseThrow(()->new IllegalStateException("Token not found."));
 
         if (confirmToken.getConfirmedAt() != null) {
@@ -149,19 +145,16 @@ public class UserController {
     public ResponseEntity<String> activateAccount(@RequestParam("token") String token) {
         Token confirmToken = tokenService.getToken(token).orElseThrow(()->new IllegalStateException("Token not found."));
 
-        if (confirmToken.getConfirmedAt() != null) {
-            throw new IllegalStateException("Email already activated.");
-        }
         LocalDateTime expiredAt = confirmToken.getExpiresAt();
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("Token expired.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"This activation link has expired.\"}");
         }
 
         tokenService.setConfirmedAt(token);
 
-        userService.activateUser(confirmToken.getUser().getEmail());
+        userService.activateUser(confirmToken.getUser().getEmail(), confirmToken.getToken());
 
-        return ResponseEntity.ok("User is activated");
+        return ResponseEntity.status(HttpStatus.OK).body("User is activated");
     }
 
 

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { request, setAuthToken } from '../helpers/axios_helper';
 import { useNavigate } from 'react-router-dom';
-import { Box, TextField, Button, Typography, Grid, Link } from '@mui/material';
+import { Box, TextField, Button, Typography, Grid, Link, Snackbar } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 import '../App.css';
 
 export default function SignUp() {
@@ -16,7 +17,7 @@ export default function SignUp() {
     username: '',
     email: '',
     password: '',
-    isActive: true,
+    isActive: false,
     userType: { type: 'FullTimeStudent' },
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -26,26 +27,60 @@ export default function SignUp() {
 
   const [emailExists, setEmailExists] = useState(false);
   const [usernameExists, setUsernameExists] = useState(false);
+  const [confirmedPassword, setConfirmedPassword] = useState('');
+
+  const [emailInputTimeout, setEmailInputTimeout] = useState(null);
+  const [usernameInputTimeout, setUsernameInputTimeout] = useState(null);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarOpen(false);
+
+    setTimeout(() => {
+      navigate('/');
+    }, 1000)
+  };
+
+  const handleConfirmedPasswordChange = (e) => {
+    setConfirmedPassword(e.target.value);
+  };
 
   const handleInputChange = async   (e) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
   
     if (name === 'email') {
-      const exists = await checkEmailExists(value);
-      setEmailExists(exists);
+      clearTimeout(emailInputTimeout);
+      setEmailExists(false);
+
+      const timeoutId = setTimeout(() => {
+        checkEmailExists(value);
+      }, 500); // Adjust the timeout duration as needed
+
+      setEmailInputTimeout(timeoutId);
     }
 
     if (name === 'username') {
-      const exists = await checkUsernameExists(value);
-      setUsernameExists(exists);
+      clearTimeout(usernameInputTimeout);
+      setUsernameExists(false);
+
+      const timeoutId = setTimeout(() => {
+        checkUsernameExists(value);
+      }, 500); // Adjust the timeout duration as needed
+
+      setUsernameInputTimeout(timeoutId);
     }
   };
 
   const checkEmailExists = async (email) => {
     try {
       const response = await axios.get(`http://localhost:8080/users/check/email=${email}`);
-      return response.data !== null;
+      setEmailExists(response.data !== null);
     } catch (error) {
       console.error(error);
       return false;
@@ -55,7 +90,9 @@ export default function SignUp() {
   const checkUsernameExists = async (username) => {
     try {
       const response = await axios.get(`http://localhost:8080/users/check/username=${username}`);
-      return response.data !== null;
+      console.log("HERE!!!!!!");
+      console.log(response);
+      setUsernameExists(response.data !== null);
     } catch (error) {
       console.error(error);
       return false;
@@ -81,13 +118,17 @@ export default function SignUp() {
       }).then(
         (response) => {
           setAuthToken(response.data.token);
-          navigate('/');
+          setSnackbarOpen(true);
+          setTimeout(() => {
+            navigate('/');
+          }, 3000)
         }
       ).catch(
         (error) => {
           setAuthToken(null);
+          console.log("HERE!");
           console.error(error);
-          navigate('/');
+          // navigate('/');
         }
       )
     
@@ -190,6 +231,19 @@ export default function SignUp() {
                 />
               </Grid>
             </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                type="password"
+                label="Confirm Password"
+                name="confirmedPassword"
+                value={confirmedPassword}
+                error={confirmedPassword !== password}
+                helperText={confirmedPassword !== password ? "Passwords do not match" : "Must be the same password"}
+                onChange={handleConfirmedPasswordChange}
+              />
+            </Grid>
             <Box mt={3} textAlign="center">
             <Button
               style={{ height: '50px', fontSize: '18px' , borderRadius: '100px'}}
@@ -205,6 +259,7 @@ export default function SignUp() {
                 password === '' ||
                 emailExists ||
                 usernameExists ||
+                confirmedPassword !== password ||
                 !/^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i.test(email) ||
                 !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,20}/i.test(password) ||
                 !/^[a-zA-Z][a-zA-Z0-9]{5,12}$/i.test(username)
@@ -216,6 +271,11 @@ export default function SignUp() {
           </form>
         </div>
       </div>
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+        <MuiAlert elevation={6} variant="filled" onClose={handleSnackbarClose} severity="success">
+          Account activation link sent successfully!
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 }

@@ -46,8 +46,7 @@ export default function Reset() {
 
     try {
       const response = await axios.put(`http://localhost:8080/users/reset-password?email=${email}&token=${token}`, {
-        newPassword,
-        repeatPassword
+        newPassword
       });
 
       if (response.status === 200) {

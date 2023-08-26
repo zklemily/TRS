@@ -11,11 +11,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Transactional
 public interface UserRepository extends JpaRepository<User, Integer> {
-    User findByEmail(String email);
-    User findByUsername(String username);
+    User findByEmailAndIsActiveTrue(String email);
+    User findByUsernameAndIsActiveTrue(String username);
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE User a SET a.is_active = TRUE WHERE a.email = :email", nativeQuery = true)
-    int activateUser(@Param("email") String email);
+    @Query(value = "UPDATE user u SET u.is_active = TRUE WHERE u.id IN (SELECT t.user_id FROM token t " +
+            "WHERE t.token = :token AND u.email = :email)", nativeQuery = true)
+    int activateUser(@Param("email") String email, @Param("token") String token);
 }

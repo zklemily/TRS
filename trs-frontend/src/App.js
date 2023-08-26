@@ -12,6 +12,7 @@ import ColorTheme from './context/color_theme';
 import ShowNavbar from './context/show_navbar';
 import Reset from'./users/reset-password';
 import SendResetLink from './users/send-reset-link';
+import Activate from './users/activate-user';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/send-reset-link" element={<SendResetLink />} />
             <Route path="/reset-password/*" element={<Reset />} />
             <Route path="/home" element={<HomePage />} />
+            <Route path="/activate/*" element={<Activate />} />
           </Routes>
         </div>
       </Router>

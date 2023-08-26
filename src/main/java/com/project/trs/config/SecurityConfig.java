@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/users/check/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/forgot-password/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/users/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users/activate").permitAll()
 //                        .requestMatchers(HttpMethod.GET, "/users/**").permitAll() // need this line for testing emails
                         .anyRequest().authenticated());
         return http.build();

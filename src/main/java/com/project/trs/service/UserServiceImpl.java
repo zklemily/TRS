@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
         Token token = new Token(user, newToken, ACCOUNT_ACTIVATION, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15));
         tokenService.saveToken(token);
 
-        String link = "http://localhost:8080/users/activate?token=" + newToken;
+        String link = "http://localhost:3000/activate?token=" + newToken;
         emailSenderService.sendActivationEmail(user.getEmail(), "Activate Your Account", user.getFirstName(), link);
 
         return user;
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmailAndIsActiveTrue(email);
         if (user != null) {
             return user;
         }
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsernameAndIsActiveTrue(username);
         if (user != null) {
             return user;
         }
@@ -114,8 +114,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int activateUser(String email) {
-        return userRepository.activateUser(email);
+    public int activateUser(String email, String token) {
+        return userRepository.activateUser(email, token);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User authenticateUser(String username, String password) {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsernameAndIsActiveTrue(username);
         if (user != null) {
             if (passwordEncoder.matches(CharBuffer.wrap(password), user.getPassword())) {
                 return user;

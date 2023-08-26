@@ -19,7 +19,7 @@ public class UserServiceHelper {
 
 
     public boolean isDuplicateEmail(String email) {
-        return userRepository.findByEmail(email) != null;
+        return userRepository.findByEmailAndIsActiveTrue(email) != null;
     }
 
     public boolean invalidEmailFormat(String email) {
